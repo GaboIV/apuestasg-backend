@@ -33,10 +33,10 @@ class UsersSeeder extends Seeder
          $player->lastname = 'Caraballo';
          $player->birthday = '1991-07-19';
          $player->gender = 'M';
-         $player->state = 'ANZ';
-         $player->city = 'ACO';
-         $player->country = "VE";
-         $player->parish = 'ACO';
+         $player->state_id = 2;
+         $player->city_id = 8;
+         $player->country_id = 231;
+         $player->parish_id = 26;
          $player->phone = '04262858771';
          $player->save();
 
@@ -56,10 +56,10 @@ class UsersSeeder extends Seeder
         $player->lastname = 'Caraballo';
         $player->birthday = '1987-08-02';
         $player->gender = 'M';
-        $player->state = 'ANZ';
-        $player->city = 'ACO';
-        $player->country = "VE";
-        $player->parish = 'ACO';
+        $player->state_id = 2;
+        $player->city_id = 8;
+        $player->country_id = 231;
+        $player->parish_id = 26;
         $player->phone = '04126969027';
         $player->save();
     }

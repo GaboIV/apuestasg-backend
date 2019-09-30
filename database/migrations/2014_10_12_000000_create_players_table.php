@@ -23,10 +23,22 @@ class CreatePlayersTable extends Migration
             $table->string('lastname');
             $table->date('birthday')->nullable();
             $table->enum('gender', Player::$genders);
-            $table->string('country');
-            $table->string('state');
-            $table->string('city');
-            $table->string('parish');
+            $table->unsignedBigInteger('country_id');
+            $table->foreign('country_id')
+                ->references('id')
+                ->on('countries');
+            $table->string('state_id');
+            $table->foreign('state_id')
+                ->references('id')
+                ->on('states');
+            $table->string('city_id');
+            $table->foreign('city_id')
+                ->references('id')
+                ->on('cities');
+            $table->string('parish_id');
+            $table->foreign('parish_id')
+                ->references('id')
+                ->on('parishes');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->enum('treatment', Player::$treatments);
