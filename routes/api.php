@@ -16,6 +16,9 @@ use Illuminate\Http\Request;
 Route::group(['prefix' => 'auth'], function () {
     // Login
     Route::post('/login', 'Auth\LoginController@login');
+
+    // Registro de jugador
+    Route::post('/register', 'Auth\RegisterController@createPlayer');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

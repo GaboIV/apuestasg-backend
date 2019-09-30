@@ -11,6 +11,8 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
+    protected $with = ["player"];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -76,6 +78,10 @@ class User extends Authenticatable
             return true;
         }
         return false;
+    }
+
+    public function player() {
+        return $this->hasOne(Player::class, 'user_id', 'id');
     }
 
     /**

@@ -24,13 +24,6 @@ class LoginController extends ApiController
     use AuthenticatesUsers;
 
     /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
      * Create a new controller instance.
      *
      * @return void
@@ -50,7 +43,7 @@ class LoginController extends ApiController
             return $this->errorResponse("Su cuenta se encuentra inhabiltada.", 403);        
         
         if (! $user->hasRole('player')) {
-            return $this->errorResponse("Usuario identificado como administrador. Acceso denegador.", 403); 
+            return $this->errorResponse("Usuario identificado como administrador. Acceso denegado.", 403); 
         }
         
         $validatePassword = Hash::check($password, $user->password);

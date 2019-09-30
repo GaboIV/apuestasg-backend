@@ -2,6 +2,7 @@
 
 use App\Role;
 use App\User;
+use App\Player;
 use Illuminate\Database\Seeder;
 
 class UsersSeeder extends Seeder
@@ -17,11 +18,27 @@ class UsersSeeder extends Seeder
         $role_admin = Role::where('name', 'admin')->first();
 
         $user = new User();
-        $user->nick = '222222';
-        $user->email = '222222@apuestasg.com';
+        $user->nick = 'gaboiv';
+        $user->email = 'gabrielcaraballo1907@gmail.com';
         $user->password = '222222';
         $user->save();
         $user->roles()->attach($role_player);
+ 
+         // Datos usuario cliente
+         $player = new Player;
+         $player->user_id = $user->id;
+         $player->document_type = 'CED';
+         $player->document_number = '19489658';
+         $player->name = 'Gabriel';
+         $player->lastname = 'Caraballo';
+         $player->birthday = '1991-07-19';
+         $player->gender = 'M';
+         $player->state = 'ANZ';
+         $player->city = 'ACO';
+         $player->country = "VE";
+         $player->parish = 'ACO';
+         $player->phone = '04262858771';
+         $player->save();
 
         $user = new User();
         $user->nick = 'master';
@@ -29,5 +46,21 @@ class UsersSeeder extends Seeder
         $user->password = '222222';
         $user->save();
         $user->roles()->attach($role_admin);
+
+        // Datos usuario cliente
+        $player = new Player;
+        $player->user_id = $user->id;
+        $player->document_type = 'CED';
+        $player->document_number = '18594179';
+        $player->name = 'Jesús';
+        $player->lastname = 'Caraballo';
+        $player->birthday = '1987-08-02';
+        $player->gender = 'M';
+        $player->state = 'ANZ';
+        $player->city = 'ACO';
+        $player->country = "VE";
+        $player->parish = 'ACO';
+        $player->phone = '04126969027';
+        $player->save();
     }
 }

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
+use App\Role;
 use App\User;
+use App\Player;
+use App\Http\Requests\PlayerRequest;
 use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
-class RegisterController extends Controller
+class RegisterController extends ApiController
 {
     /*
     |--------------------------------------------------------------------------
@@ -24,13 +25,6 @@ class RegisterController extends Controller
     use RegistersUsers;
 
     /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
      * Create a new controller instance.
      *
      * @return void
@@ -41,32 +35,34 @@ class RegisterController extends Controller
     }
 
     /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-    }
-
-    /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
      * @return \App\User
      */
-    protected function create(array $data)
+    protected function createPlayer(PlayerRequest $request)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        $data = $request->all();   
+
+        $uniqueUser = Player::where('document_number', $data['document_number'])
+                          ->where('document_type', $data['document_type'])
+                          ->first();  
+
+        if ($uniqueUser) 
+            return $this->errorResponse("Ya existe un usuario con este tipo y número de documento", 409);
+
+        $user = User::create($data);
+
+        // Relación Usuario-Rol. Jugador por defecto.
+        $user->roles()->attach(Role::where('name', 'player')->first());
+        
+        $user->player()->create($data); 
+        
+        $response['user'] = $user;
+
+        return $this->successResponse($response, 201);
     }
+
+
+    
 }
