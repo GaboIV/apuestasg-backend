@@ -27,7 +27,7 @@ class CreateLeaguesTable extends Migration
             $table->unsignedBigInteger('category_id');
             $table->foreign('category_id')
                 ->references('id')
-                ->on('catgories');
+                ->on('categories');
             $table->timestamps();
         });
     }

@@ -3,8 +3,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Account;
 
-class CreateJockeysTable extends Migration
+class CreateAccountsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +14,17 @@ class CreateJockeysTable extends Migration
      */
     public function up()
     {
-        Schema::create('jockeys', function (Blueprint $table) {
+        Schema::create('accounts', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->decimal('weight');
-            $table->decimal('height');
-            $table->unsignedBigInteger('country_id');
-            $table->foreign('country_id')
+            $table->string('number');
+            $table->string('document');
+            $table->string('email');
+            $table->enum('type', Account::$types);
+            $table->unsignedBigInteger('bank_id');
+            $table->foreign('bank_id')
                 ->references('id')
-                ->on('countries');
+                ->on('banks');
             $table->timestamps();
         });
     }
@@ -33,6 +36,6 @@ class CreateJockeysTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('jockeys');
+        Schema::dropIfExists('accounts');
     }
 }

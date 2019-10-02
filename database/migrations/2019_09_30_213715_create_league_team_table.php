@@ -15,16 +15,14 @@ class CreateLeagueTeamTable extends Migration
     {
         Schema::create('league_team', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('league_id')->unsigned();
+            $table->unsignedBigInteger('league_id');
             $table->foreign('league_id')
                 ->references('id')
-                ->on('leagues')
-                ->onDelete('cascade');
-            $table->integer('team_id')->unsigned();
+                ->on('leagues');
+            $table->unsignedBigInteger('team_id');
             $table->foreign('team_id')
                 ->references('id')
-                ->on('teams')
-                ->onDelete('cascade');
+                ->on('teams');
             $table->timestamps();
         });
     }
