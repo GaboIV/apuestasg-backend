@@ -21,6 +21,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', 'Auth\RegisterController@createPlayer');
 });
 
+Route::get('/hora', 'General\GeneralController@hora');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
