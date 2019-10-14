@@ -22,7 +22,17 @@ class DatabaseSeeder extends Seeder
 
         // La creación de datos de roles debe ejecutarse primero
         $this->call(RoleSeeder::class);
+
         // Los usuarios necesitarán los roles previamente generados
         $this->call(UsersSeeder::class);
+
+        // Deportes
+        $this->call(CategoriesSeeder::class);
+
+        // Tipos de apuestas
+        $this->call(BetTypeSeeder::class);
+
+        // Ligas
+        $this->call(LeaguesSeeder::class);
     }
 }

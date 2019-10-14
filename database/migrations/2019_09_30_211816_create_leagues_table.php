@@ -16,7 +16,7 @@ class CreateLeaguesTable extends Migration
         Schema::create('leagues', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('name_uk');
+            $table->string('name_uk')->nullable();
             $table->string('description');
             $table->string('url');
             $table->decimal('importance');

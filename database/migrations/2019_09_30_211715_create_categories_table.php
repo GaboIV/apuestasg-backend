@@ -17,7 +17,7 @@ class CreateCategoriesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('acro_3');
-            $table->string('data');
+            $table->string('data')->nullable();
             $table->decimal('importance');
             $table->timestamps();
         });
