@@ -17,7 +17,7 @@ class CreateLeaguesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('name_uk')->nullable();
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->string('url');
             $table->decimal('importance');
             $table->unsignedBigInteger('country_id');

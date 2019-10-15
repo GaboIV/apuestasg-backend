@@ -17,7 +17,7 @@ class LeaguesSeeder extends Seeder
         $league->url = 'http://odds.football-data.co.uk/baseball/major-league-baseball/';
         $league->importance = '100';
         $league->country_id = '226';
-        $league->category_id = '22';
+        $league->category_id = '2';
         $league->save();
     }
 }

@@ -17,9 +17,9 @@ class CreateTeamsTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('name_uk');
-            $table->string('acro');
-            $table->string('stadium');
-            $table->unsignedBigInteger('country_id');
+            $table->string('acro')->nullable();
+            $table->string('stadium')->nullable();
+            $table->unsignedBigInteger('country_id')->nullable();
             $table->foreign('country_id')
                 ->references('id')
                 ->on('countries');
