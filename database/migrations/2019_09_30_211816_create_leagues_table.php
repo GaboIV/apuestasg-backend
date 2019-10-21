@@ -19,7 +19,7 @@ class CreateLeaguesTable extends Migration
             $table->string('name_uk')->nullable();
             $table->string('description')->nullable();
             $table->string('url');
-            $table->decimal('importance');
+            $table->decimal('importance')->nullable();
             $table->unsignedBigInteger('country_id');
             $table->foreign('country_id')
                 ->references('id')

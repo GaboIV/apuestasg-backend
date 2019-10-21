@@ -22,7 +22,15 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 Route::get('/hora', 'General\GeneralController@hora');
+Route::get('/showgamesbycategory', 'General\GeneralController@showGamesByCategory');
+Route::get('/showgames/{id}', 'General\GeneralController@GamesByCategory');
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'auth:api'], function () {
+	Route::get('auth/logout', 'Auth\LoginController@logout');
+    Route::resource('leagues', 'Api\LeagueController')->except([
+	    'create', 'edit'
+	]);
+	Route::resource('games', 'Api\GameController')->except([
+	    'create', 'edit'
+	]);
 });
