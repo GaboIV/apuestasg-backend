@@ -46,9 +46,9 @@ class LoginController extends ApiController
         if (!$user->status)
             return $this->errorResponse("Su cuenta se encuentra inhabiltada.", 403);        
         
-        if (!$user->hasRole('player')) {
-            return $this->errorResponse("Usuario identificado como administrador. Acceso denegado.", 403);
-        }
+        // if (!$user->hasRole('player')) {
+        //     return $this->errorResponse("Usuario identificado como administrador. Acceso denegado.", 403);
+        // }
         
         $validatePassword = Hash::check($password, $user->password);
 

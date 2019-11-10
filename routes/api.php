@@ -22,4 +22,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 	Route::resource('games', 'Api\GameController')->except([
 	    'create', 'edit'
 	]);
+	Route::get('categories', 'Admin\AdminController@loadCategories');
+	Route::get('countries', 'Admin\AdminController@loadCountries');
 });

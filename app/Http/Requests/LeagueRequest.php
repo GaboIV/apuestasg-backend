@@ -42,7 +42,9 @@ class LeagueRequest extends FormRequest
             'name' => 'required|unique:leagues,name',
             'name_uk' => 'string',
             'description' => 'string',
-            'url' => 'required|string|unique:leagues,url'
+            'category_id' => 'required|numeric',
+            'country_id' => 'required|numeric',
+            'url' => 'nullable|string|unique:leagues,url'
         ];
     }
 
