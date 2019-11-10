@@ -4,6 +4,7 @@ namespace App\Http\Controllers\General;
 
 use App\Category;
 use App\Game;
+use App\League;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 
@@ -41,11 +42,22 @@ class GeneralController extends ApiController {
 
     public function GamesByCategory($id) {
 
-        $juegos = Game::where('games.id', '>', 1)
-        ->where('leagues.category_id', $id)
-        ->join('leagues', 'games.league_id', '=', 'leagues.id')
-        ->select('games.*')
-        ->get();
+        // $juegos = Game::where('games.id', '>', 1)
+        // ->where('leagues.category_id', $id)
+        // ->join('leagues', 'games.league_id', '=', 'leagues.id')
+        // ->select('games.*','leagues.name','leagues.country_id')
+        // ->with('competitors')
+        // ->get();
+
+        $juegos = League::whereHas('games', function ($query) {
+                            $query->where('id', '>', 25);
+                        })
+                        ->with(["games" => function($q){
+                            $q->with('competitors');
+                        }])
+                        ->where('leagues.category_id', $id)
+                        ->get();
+
 
 
         return $this->successResponse([
