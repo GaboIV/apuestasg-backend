@@ -19,7 +19,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::resource('leagues', 'Api\LeagueController')->except([
 	    'create', 'edit'
 	]);
+	Route::put('games/updateOutstanding/{id}', 'Api\GameController@updateOutstanding');
 	Route::resource('games', 'Api\GameController')->except([
+	    'create', 'edit'
+	]);
+	Route::resource('teams', 'Api\TeamController')->except([
 	    'create', 'edit'
 	]);
 	Route::get('categories', 'Admin\AdminController@loadCategories');

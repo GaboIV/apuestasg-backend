@@ -12,4 +12,14 @@ class League extends Model {
     public function games() {
         return $this->hasMany('App\Game');
     }
+
+    public function teams() {
+        return $this
+            ->belongsToMany('App\Team')
+            ->withTimestamps();
+    }
+
+    public function category() {
+        return $this->hasOne(Category::class, 'id', 'category_id');
+    }
 }

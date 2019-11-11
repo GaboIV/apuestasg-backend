@@ -15,21 +15,38 @@ class GameController extends ApiController
      */
     public function index()
     {
-        $games = Game::get();
+        $games = Game::orderBy('start', 'desc')
+                     ->with(["competitors" => function($q) {
+                            $q->with('team');
+                        }])
+                     ->with(["league" => function($q) {
+                            $q->with('category');
+                        }])
+                     ->paginate(30);
 
         return $this->successResponse([
             'games' => $games
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         //
+    }
+
+    public function updateOutstanding($id, Request $request) {
+
+        if ($request->has('outstanding')) {
+            $game = Game::find($id);
+
+            $game->outstanding = $request->outstanding;
+
+            $game->save();
+        }
+
+        return $this->successResponse([
+            'games' => $game
+        ], 200);
     }
 
     /**
