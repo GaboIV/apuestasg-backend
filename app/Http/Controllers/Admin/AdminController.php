@@ -25,4 +25,13 @@ class AdminController extends ApiController {
             'countries' => $countries
         ], 200);
     }
+
+    public function loadUpdates() {
+        $updates = Category::with("leagues")
+                            ->get();
+
+        return $this->successResponse([
+            'updates' => $updates
+        ], 200);
+    }
 }

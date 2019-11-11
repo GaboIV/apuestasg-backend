@@ -24,4 +24,5 @@ Route::group(['middleware' => 'auth:api'], function () {
 	]);
 	Route::get('categories', 'Admin\AdminController@loadCategories');
 	Route::get('countries', 'Admin\AdminController@loadCountries');
+	Route::get('updates', 'Admin\AdminController@loadUpdates');
 });
