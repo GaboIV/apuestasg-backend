@@ -32,4 +32,8 @@ class Player extends Model
     public function setDoiTypeAttribute($value) {
         $this->attributes['document_number'] = strtoupper($value);
     }
+
+    public function selections() {
+        return $this->hasMany('App\Selection');
+    }
 }

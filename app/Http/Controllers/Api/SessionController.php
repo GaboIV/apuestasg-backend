@@ -1,37 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\LoginRequest;
-use App\User;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
-class LoginController extends ApiController
-{
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
+class SessionController extends ApiController {
+    public function loadSelections() {
+        $user = Auth::user();
+        $player = $user->player;
+        $selections = $player->selections;
 
-    use AuthenticatesUsers;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
+        return $this->successResponse([
+            'selections' => $selections
+        ], 200);
     }
 
     public function login (LoginRequest $request) {
@@ -42,36 +26,8 @@ class LoginController extends ApiController
         if ($request->tipoken == 'token') {
             $user = Auth::user();
             $apiToken = 'current';
-
-            $data = array(
-                'access_token' => $apiToken,
-                'user' => $user,
-                'menu' => ""
-            );        
-            
-            return $this->successResponse($data, 200);
         } else {
-            $user = User::where('nick', $nick)->first() ?? null;
-
-            if (!$user)
-                return $this->errorResponse("No existe usuario con estas credenciales", 403);
-          
-            if (!$user->status)
-                return $this->errorResponse("Su cuenta se encuentra inhabiltada.", 403);        
-            
-            // if (!$user->hasRole('player')) {
-            //     return $this->errorResponse("Usuario identificado como administrador. Acceso denegado.", 403);
-            // }
-            
-            $validatePassword = Hash::check($password, $user->password);
-
-            if (!$validatePassword) 
-                return $this->errorResponse("La contraseña que ingresaste es incorrecta. Inténtalo de nuevo.", 403);
-
-            $tokenResult = $user->createToken('Pl@y3rTok3n');
-            $token = $tokenResult->token;
-            $token->save();
-            $apiToken = $tokenResult->accessToken;
+        	return $this->errorResponse("Acción no permitida.", 403); 
         }
 
         if ($user->hasRole('admin')) {
@@ -141,7 +97,7 @@ class LoginController extends ApiController
                 'titulo' => 'Mensajes',
                 'icono' => 'fa fa-mail-bulk',
                 'data' => 'Ir a Mensajes',
-                'link' => 'mensajes/'.$token['id']
+                'link' => 'mensajes'
             ); $o++;
 
             $menu[$o] = array(
@@ -169,7 +125,7 @@ class LoginController extends ApiController
                 'titulo' => 'Estadísticas',
                 'icono' => 'fa fa-percent',
                 'data' => 'Ir a Estadísticas',
-                'link' => 'estadisticas/'.$token['id']
+                'link' => 'estadisticas/'
             ); $o++;
 
             $menu[$o] = array(
@@ -191,14 +147,14 @@ class LoginController extends ApiController
                 'titulo' => 'Historial',
                 'icono' => 'fa fa-history',
                 'data' => 'Ir a Historial',
-                'link' => 'historial/'.$token['id']
+                'link' => 'historial/'
             );
 
             $menu[2] = array(
                 'titulo' => 'Mensajes',
                 'icono' => 'fa fa-mail-bulk',
                 'data' => 'Ir a Mensajes',
-                'link' => 'mensajes/'.$token['id']
+                'link' => 'mensajes/'
             );
 
             $menu[3] = array(
@@ -226,7 +182,7 @@ class LoginController extends ApiController
                 'titulo' => 'Estadísticas',
                 'icono' => 'fa fa-percent',
                 'data' => 'Ir a Estadísticas',
-                'link' => 'estadisticas/'.$token['id']
+                'link' => 'estadisticas/'
             );
              $menu[7] = array(
                 'titulo' => 'Resultados',

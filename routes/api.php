@@ -29,5 +29,10 @@ Route::group(['middleware' => 'auth:api'], function () {
 	]);
 	Route::get('categories', 'Admin\AdminController@loadCategories');
 	Route::get('countries', 'Admin\AdminController@loadCountries');
-	Route::get('updates', 'Admin\AdminController@loadUpdates');
+	Route::get('updates', 'Admin\AdminController@loadUpdates');	
+
+	Route::group(['prefix' => 'player'], function () {
+        Route::get('/selections/load', 'Api\SessionController@loadSelections');
+        Route::post('/login', 'Api\SessionController@login');
+    });
 });
