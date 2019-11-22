@@ -14,12 +14,12 @@ class Team extends Model {
     }
 
     public function getImageAttribute() { 
-    	$file = storage_path("app/teams/" . $this->id);
+    	$file = storage_path("app/teams/" . $this->id . ".png");
 
 	    if(!file_exists($file)) {
-	    	return storage_path("app/teams/noimage.png");
+	    	return "noimage.png";
 	    } else {
-	    	return storage_path("app/teams/" . $this->id);
+	    	return $this->id.".png";
 	    }
     }
 }

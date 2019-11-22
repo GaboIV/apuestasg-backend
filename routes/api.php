@@ -13,6 +13,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::get('/hora', 'General\GeneralController@hora');
 Route::get('/showgamesbycategory', 'General\GeneralController@showGamesByCategory');
 Route::get('/showgames/{id}', 'General\GeneralController@GamesByCategory');
+Route::get('/showgamesoutstanding', 'General\GeneralController@GamesOutstanding');
 
 Route::group(['middleware' => 'auth:api'], function () {
 	Route::get('auth/logout', 'Auth\LoginController@logout');
