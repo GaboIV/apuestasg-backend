@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Selection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -34,6 +35,6 @@ class Player extends Model
     }
 
     public function selections() {
-        return $this->hasMany('App\Selection');
+        return $this->hasMany(Selection::class)->with('game.competitors', 'competitor.team');
     }
 }

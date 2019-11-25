@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Competitor;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\LoginRequest;
+use App\Selection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,6 +17,86 @@ class SessionController extends ApiController {
 
         return $this->successResponse([
             'selections' => $selections
+        ], 200);
+    }
+
+    public function select(Request $request) {
+        $user = Auth::user();
+        $player = $user->player;
+        $data = $request->all();
+        $cuota = 1;
+        $decim_tot = 1;
+        $status = '';
+        $mstatus = '';
+        $selecciones = [];
+        $tipo = '';
+        
+        $exists = Selection::whereSelectId($data['bet_id'])
+                    ->where('player_id', $player->id)
+                    ->where(function ($query) {
+                        $query->where('ticket_id', '0')
+                              ->orWhere('ticket_id', '')
+                              ->orWhere('ticket_id', null);
+                    })
+                    ->get();
+
+        if (count($exists) > 0) {
+            $exists = Selection::whereSelectId($data['bet_id'])
+                    ->where('player_id', $player->id)
+                    ->where(function ($query) {
+                        $query->where('ticket_id', '0')
+                              ->orWhere('ticket_id', '')
+                              ->orWhere('ticket_id', null);
+                    })
+                    ->delete();
+        } else {
+            $competitor = Competitor::whereId($data['bet_id'])->first();
+
+            $odd = $competitor["odd"];
+            $game_id = $competitor["game_id"];
+
+            $exists2 = Selection::whereSample($game_id)
+                    ->where('player_id', $player->id)
+                    ->where(function ($query) {
+                        $query->where('ticket_id', '0')
+                              ->orWhere('ticket_id', '')
+                              ->orWhere('ticket_id', null);
+                    })
+                    ->get();
+
+            if (count($exists2) > 0) {
+
+            } else {
+                $selection = new Selection;
+                $selection->select_id = $data['bet_id'];
+                $selection->sample = $game_id;
+                $selection->value = $odd;
+                $selection->category_id = $data['category_id'];
+                $selection->ticket_id = null;
+
+                $player->selections()->save($selection);
+            }               
+        }
+
+        $selecciones = $player->selections;
+
+        for ($i=0; $i < count($selecciones); $i++) { 
+            $odd_fracc = $selecciones[$i]["value"];
+            $div_div = explode("/", $odd_fracc);
+            if (!isset($div_div[1])) {
+                $div_div[1] = 1;
+            }       
+            $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
+            $decim_tot = $decim_tot * $decimal_odd;
+
+            if (count($selecciones[$i]['game']['competitors']) == '3') {
+                $selecciones[$i]['game']['name'] = $selecciones[$i]['game']['competitors'][0]['team']['name'] . " vs " . $selecciones[$i]['game']['competitors'][2]['team']['name'];
+            }
+        }
+
+        return $this->successResponse([
+            'selections' => $selecciones,
+            'quot' => $decim_tot
         ], 200);
     }
 

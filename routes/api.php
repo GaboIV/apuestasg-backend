@@ -33,6 +33,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
 	Route::group(['prefix' => 'player'], function () {
         Route::get('/selections/load', 'Api\SessionController@loadSelections');
+        Route::post('/selections/add', 'Api\SessionController@select');
         Route::post('/login', 'Api\SessionController@login');
     });
 });

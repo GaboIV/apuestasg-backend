@@ -30,7 +30,7 @@ class CreateSelectionsTable extends Migration
             $table->foreign('select_id')
                 ->references('id')
                 ->on('competitors');
-            $table->unsignedBigInteger('ticket_id');
+            $table->unsignedBigInteger('ticket_id')->default(0);
             $table->foreign('ticket_id')
                 ->references('id')
                 ->on('tickets');
