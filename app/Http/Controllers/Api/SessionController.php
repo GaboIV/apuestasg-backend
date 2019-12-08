@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Competitor;
+use App\Game;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\LoginRequest;
 use App\Selection;
+use App\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,10 +15,80 @@ class SessionController extends ApiController {
     public function loadSelections() {
         $user = Auth::user();
         $player = $user->player;
+        $selecciones = [];
+        $tipo = '';
+        $decim_tot = 1;
+
         $selections = $player->selections;
 
+        $i = 0;
+
+        foreach ($selections as $sel) {
+            $id_select = $sel["select_id"];
+
+            if ($sel['category_id'] == '7') {
+
+             
+            } else {
+                $tipo = "2x";
+
+                $id_part_2 = $sel->competitor["id"];
+                $id_equipo = $sel->competitor["team_id"];
+                $div_equipo_part1 = $sel->competitor["odd"];
+
+                $div_div = explode("/", $div_equipo_part1);
+
+                if (!isset($div_div[1])) {
+                    $div_div[1] = 1;
+                }
+
+                foreach ($sel->game->competitors as $comp) {
+                    if ($comp->id == $sel->select_id) {
+                        $f8 = $comp;
+                        break;
+                    }
+                }             
+
+                $id_partido = $f8["game_id"];
+
+                $name_partido =  $sel->game->web_id;
+
+                $date_actual = date("Y-m-d H:i:s");
+                $date_juego = $sel->game->start;
+
+                if ($date_actual > $date_juego) {
+                    $control2 = "mayor";
+                } else {
+                    $control2 = "";
+                    $selecciones[$i]['value'] = $sel->value; 
+                    $selecciones[$i]['id'] = $sel->id;   
+                    $selecciones[$i]['equipo'] = $f8->team->name;
+                }
+
+                $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
+
+                if ($control2 != "mayor") {
+                    $decim_tot = $decimal_odd * $decim_tot;                         
+                }
+
+                if (count($sel->game->competitors) == 2)
+                    $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
+                elseif (count($sel->game->competitors) == 3)
+                    $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];                
+
+                if ($control2 == "mayor") {
+                    $con8 = Selection::whereSelectId($id_part_2)->wherePlayerId($player->id);
+                    $con8->delete();
+                }                
+            }
+
+            $i++;  
+        }
+
         return $this->successResponse([
-            'selections' => $selections
+            "tipo" => $tipo,
+            "selecciones" => $selecciones,
+            "cuota" => $decim_tot
         ], 200);
     }
 
@@ -38,17 +110,10 @@ class SessionController extends ApiController {
                               ->orWhere('ticket_id', '')
                               ->orWhere('ticket_id', null);
                     })
-                    ->get();
+                    ->first();
 
-        if (count($exists) > 0) {
-            $exists = Selection::whereSelectId($data['bet_id'])
-                    ->where('player_id', $player->id)
-                    ->where(function ($query) {
-                        $query->where('ticket_id', '0')
-                              ->orWhere('ticket_id', '')
-                              ->orWhere('ticket_id', null);
-                    })
-                    ->delete();
+        if ($exists) {
+            $exists->delete();
         } else {
             $competitor = Competitor::whereId($data['bet_id'])->first();
 
@@ -78,10 +143,10 @@ class SessionController extends ApiController {
             }               
         }
 
-        $selecciones = $player->selections;
+        $selections = $player->selections;
 
-        for ($i=0; $i < count($selecciones); $i++) { 
-            $odd_fracc = $selecciones[$i]["value"];
+        for ($i=0; $i < count($selections); $i++) { 
+            $odd_fracc = $selections[$i]["value"];
             $div_div = explode("/", $odd_fracc);
             if (!isset($div_div[1])) {
                 $div_div[1] = 1;
@@ -89,15 +154,57 @@ class SessionController extends ApiController {
             $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
             $decim_tot = $decim_tot * $decimal_odd;
 
-            if (count($selecciones[$i]['game']['competitors']) == '3') {
-                $selecciones[$i]['game']['name'] = $selecciones[$i]['game']['competitors'][0]['team']['name'] . " vs " . $selecciones[$i]['game']['competitors'][2]['team']['name'];
+            if (count($selections[$i]['game']['competitors']) == '3') {
+                $selecciones[$i]['encuentro'] = $selections[$i]['game']['competitors'][0]['team']['name'] . " vs " . $selections[$i]['game']['competitors'][2]['team']['name'];
             }
+
+            foreach ($selections[$i]->game->competitors as $comp) {
+                if ($comp->id == $selections[$i]->select_id) {
+                    $f8 = $comp;
+                    break;
+                }
+            }
+
+            $selecciones[$i]['value'] = $selections[$i]->value; 
+            $selecciones[$i]['id'] = $selections[$i]->id;   
+            $selecciones[$i]['equipo'] = $f8->team->name;
         }
 
         return $this->successResponse([
             'selections' => $selecciones,
             'quot' => $decim_tot
         ], 200);
+    }
+
+    public function deleteSelect ($id) {
+        if ($id == 'all') {
+            $user = Auth::user();
+            $player = $user->player;
+            $player->selections()->forceDelete();
+
+            $result = array(
+                "status" => 'success',
+                "mstatus" => 'Selecciones eliminadas'
+            ); 
+        } else {
+            $select = Selection::find($id);
+
+            if ($select) {
+                if ($select->delete()){
+                    $result = array(
+                        "status" => 'success',
+                        "mstatus" => 'Selección eliminada'
+                    ); 
+                }; 
+            } else {
+                $result = array(
+                    "status" => 'error',
+                    "mstatus" => 'No se puede eliminar la selección'
+                );
+            }
+        }
+
+        return $this->successResponse($result, 200);        
     }
 
     public function login (LoginRequest $request) {

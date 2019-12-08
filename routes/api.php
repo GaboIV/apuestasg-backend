@@ -34,6 +34,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 	Route::group(['prefix' => 'player'], function () {
         Route::get('/selections/load', 'Api\SessionController@loadSelections');
         Route::post('/selections/add', 'Api\SessionController@select');
+        Route::delete('/selections/delete/{id}', 'Api\SessionController@deleteSelect');
         Route::post('/login', 'Api\SessionController@login');
+        Route::post('/ticket/add', 'Api\TicketController@add');
     });
 });

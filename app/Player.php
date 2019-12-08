@@ -35,6 +35,8 @@ class Player extends Model
     }
 
     public function selections() {
-        return $this->hasMany(Selection::class)->with('game.competitors', 'competitor.team');
+        return $this->hasMany(Selection::class)
+        ->where('ticket_id', null)
+        ->with('game.competitors');
     }
 }

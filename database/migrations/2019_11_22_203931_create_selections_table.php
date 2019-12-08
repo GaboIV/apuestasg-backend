@@ -31,7 +31,7 @@ class CreateSelectionsTable extends Migration
                 ->references('id')
                 ->on('competitors');
             $table->unsignedBigInteger('ticket_id')->default(0);
-            $table->foreign('ticket_id')
+            $table->foreign('ticket_id')->nullable()
                 ->references('id')
                 ->on('tickets');
             $table->timestamps();
