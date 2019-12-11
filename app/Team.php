@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Team extends Model {
 	protected $appends = ['image'];
 
+    protected $fillable = [
+        'country_id'
+    ];
+
     public function leagues() {
         return $this
             ->belongsToMany('App\League')

@@ -28,7 +28,14 @@ class TeamController extends ApiController {
     }
 
     public function update(Request $request, $id) {
-        //
+        $data = $request->all();
+
+        $team = Team::whereId($id)
+            ->update($data);
+
+        return $this->successResponse([
+            'status' => 'success'
+        ], 200);
     }
 
     public function destroy($id) {

@@ -16,12 +16,12 @@ class CreateTicketsTable extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('code');
-            $table->string('correlative');
+            $table->string('correlative')->nullable();
             $table->unsignedBigInteger('player_id');
             $table->foreign('player_id')
                 ->references('id')
                 ->on('players');
-            $table->datetime('time');
+            $table->datetime('time')->nullable();
             $table->unsignedBigInteger('amount');
             $table->decimal('towin');
             $table->integer('status');

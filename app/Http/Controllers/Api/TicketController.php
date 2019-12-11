@@ -34,50 +34,53 @@ class TicketController extends ApiController
 
        		if (count($selections) >= 1) {
        			foreach ($selections as $sel) {
-	            	$cod_serial = substr(md5(rand()),0,10);
-	                $selecciones[] = $sel;
+       				if ($sel->game->start <= date("Y-m-d H:i:s")) {
+		                $sel->delete();
+		            } else {
+		                $selecciones[] = $sel;
 
-			        if ($sel->game) {
-			        	$league = League::whereId($sel->game->league_id)->first();
+				        if ($sel->game) {
+				        	$league = League::whereId($sel->game->league_id)->first();
 
-			        	$ticketes[0]['selecciones'][$i]['id'] = $sel->id;
-                        $ticketes[0]['selecciones'][$i]['dividendo'] = $sel->value;
-                        $ticketes[0]['selecciones'][$i]['liga'] = $league->name;
+				        	$ticketes[0]['selecciones'][$i]['id'] = $sel->id;
+	                        $ticketes[0]['selecciones'][$i]['dividendo'] = $sel->value;
+	                        $ticketes[0]['selecciones'][$i]['liga'] = $league->name;
 
-                        $id_select = $sel->select_id;
+	                        $id_select = $sel->select_id;
 
-                        foreach ($sel->game->competitors as $comp) {
-		                    if ($comp->id == $sel->select_id) {
-		                        $competitor = $comp;
-		                        break;
-		                    }
-		                } 
+	                        foreach ($sel->game->competitors as $comp) {
+			                    if ($comp->id == $sel->select_id) {
+			                        $competitor = $comp;
+			                        break;
+			                    }
+			                } 
 
-                        if ($competitor) {
-                        	$team_id = $competitor->team_id;
+	                        if ($competitor) {
+	                        	$team_id = $competitor->team_id;
 
-                            $odd_fracc = $competitor->odd;
+	                            $odd_fracc = $competitor->odd;
 
-                            $odd = explode("/", $odd_fracc);
+	                            $odd = explode("/", $odd_fracc);
 
-                            if (!isset($odd[1])) {
-                                $odd[1] = 1;
-                            }
+	                            if (!isset($odd[1])) {
+	                                $odd[1] = 1;
+	                            }
 
-                            $decimal_odd = (intval($odd[0]) / intval($odd[1])) + 1;
-                            $decim_tot = $decimal_odd * $decim_tot;
+	                            $decimal_odd = (intval($odd[0]) / intval($odd[1])) + 1;
+	                            $decim_tot = $decimal_odd * $decim_tot;
 
-                            $towin = $decim_tot * $monto;
+	                            $towin = $decim_tot * $monto;
 
-                            $ticketes[0]['selecciones'][$i]['equipo'] = $competitor->team->name;
+	                            $ticketes[0]['selecciones'][$i]['equipo'] = $competitor->team->name;
 
-                            if (count($sel->game->competitors) == 2)
-			                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
-			                elseif (count($sel->game->competitors) == 3)
-			                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];
-                        }
-			        }
-			        $i++;
+	                            if (count($sel->game->competitors) == 2)
+				                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
+				                elseif (count($sel->game->competitors) == 3)
+				                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];
+	                        }
+				        }
+				        $i++;
+				    }			        
 	            }
 
 	            $ticket_id = DB::table('tickets')->insertGetId(

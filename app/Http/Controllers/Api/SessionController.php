@@ -24,65 +24,48 @@ class SessionController extends ApiController {
         $i = 0;
 
         foreach ($selections as $sel) {
-            $id_select = $sel["select_id"];
-
-            if ($sel['category_id'] == '7') {
-
-             
+            if ($sel->game->start <= date("Y-m-d H:i:s")) {
+                $sel->delete();
             } else {
-                $tipo = "2x";
-
-                $id_part_2 = $sel->competitor["id"];
-                $id_equipo = $sel->competitor["team_id"];
-                $div_equipo_part1 = $sel->competitor["odd"];
-
-                $div_div = explode("/", $div_equipo_part1);
-
-                if (!isset($div_div[1])) {
-                    $div_div[1] = 1;
-                }
-
-                foreach ($sel->game->competitors as $comp) {
-                    if ($comp->id == $sel->select_id) {
-                        $f8 = $comp;
-                        break;
-                    }
-                }             
-
-                $id_partido = $f8["game_id"];
-
-                $name_partido =  $sel->game->web_id;
-
-                $date_actual = date("Y-m-d H:i:s");
-                $date_juego = $sel->game->start;
-
-                if ($date_actual > $date_juego) {
-                    $control2 = "mayor";
+                if ($sel['category_id'] == '7') {
+                    
                 } else {
-                    $control2 = "";
+                    $tipo = "2x";
+
+                    $id_part_2 = $sel->competitor["id"];
+                    $id_equipo = $sel->competitor["team_id"];
+                    $div_equipo_part1 = $sel->competitor["odd"];
+
+                    $div_div = explode("/", $div_equipo_part1);
+
+                    if (!isset($div_div[1])) {
+                        $div_div[1] = 1;
+                    }
+
+                    foreach ($sel->game->competitors as $comp) {
+                        if ($comp->id == $sel->select_id) {
+                            $f8 = $comp;
+                            break;
+                        }
+                    }             
+
+                    $id_partido = $f8["game_id"];
+
+                    $name_partido =  $sel->game->web_id;
+
                     $selecciones[$i]['value'] = $sel->value; 
                     $selecciones[$i]['id'] = $sel->id;   
                     $selecciones[$i]['equipo'] = $f8->team->name;
+                    
+                    $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
+
+                    if (count($sel->game->competitors) == 2)
+                        $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
+                    elseif (count($sel->game->competitors) == 3)
+                        $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];                             
                 }
-
-                $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-
-                if ($control2 != "mayor") {
-                    $decim_tot = $decimal_odd * $decim_tot;                         
-                }
-
-                if (count($sel->game->competitors) == 2)
-                    $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
-                elseif (count($sel->game->competitors) == 3)
-                    $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];                
-
-                if ($control2 == "mayor") {
-                    $con8 = Selection::whereSelectId($id_part_2)->wherePlayerId($player->id);
-                    $con8->delete();
-                }                
-            }
-
-            $i++;  
+                $i++; 
+            }             
         }
 
         return $this->successResponse([
@@ -144,30 +127,37 @@ class SessionController extends ApiController {
         }
 
         $selections = $player->selections;
+        $i = 0;
 
-        for ($i=0; $i < count($selections); $i++) { 
-            $odd_fracc = $selections[$i]["value"];
-            $div_div = explode("/", $odd_fracc);
-            if (!isset($div_div[1])) {
-                $div_div[1] = 1;
-            }       
-            $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-            $decim_tot = $decim_tot * $decimal_odd;
+        foreach ($selections as $sel) {
+            if ($sel->game->start <= date("Y-m-d H:i:s")) {
+                $sel->delete();
+            } else {
+                $odd_fracc = $sel[$i]["value"];
+                $div_div = explode("/", $odd_fracc);
+                if (!isset($div_div[1])) {
+                    $div_div[1] = 1;
+                }       
+                $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
+                $decim_tot = $decim_tot * $decimal_odd;
 
-            if (count($selections[$i]['game']['competitors']) == '3') {
-                $selecciones[$i]['encuentro'] = $selections[$i]['game']['competitors'][0]['team']['name'] . " vs " . $selections[$i]['game']['competitors'][2]['team']['name'];
-            }
-
-            foreach ($selections[$i]->game->competitors as $comp) {
-                if ($comp->id == $selections[$i]->select_id) {
-                    $f8 = $comp;
-                    break;
+                if (count($sel->game->competitors) == '3') {
+                    $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][2]['team']['name'];
                 }
-            }
 
-            $selecciones[$i]['value'] = $selections[$i]->value; 
-            $selecciones[$i]['id'] = $selections[$i]->id;   
-            $selecciones[$i]['equipo'] = $f8->team->name;
+                foreach ($sel->game->competitors as $comp) {
+                    if ($comp->id == $sel->select_id) {
+                        $f8 = $comp;
+                        break;
+                    }
+                }
+
+                $selecciones[$i]['value'] = $selections[$i]->value; 
+                $selecciones[$i]['id'] = $selections[$i]->id;   
+                $selecciones[$i]['equipo'] = $f8->team->name;
+
+                $i++;
+            }
         }
 
         return $this->successResponse([

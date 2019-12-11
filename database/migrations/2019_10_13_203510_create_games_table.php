@@ -15,7 +15,7 @@ class CreateGamesTable extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('id_web');
+            $table->string('web_id');
             $table->datetime('start');
             $table->date('avaible');
             $table->string('url');
