@@ -52,4 +52,38 @@ class GameController extends ApiController
     public function destroy($id) {
         //
     }
+
+    public function byFilters(Request $request) {
+        $data = $request->all();
+
+        $query = Game::with('league.category')->with('competitors');
+
+        if (isset($data['category_id']) || isset($data['country_id'])) {
+            $query->whereHas('league', function ($queryL) use ($data) {
+            	if (isset($data['category_id']) && $data['category_id'] != 0) 
+			    	$queryL->where('category_id', '=', $data['category_id']);
+			    if (isset($data['country_id']) && $data['country_id'] != 0) 
+			    	$queryL->where('country_id', '=', $data['country_id']);
+			});
+        }
+
+        if (isset($data['start']) && $data['start'] != 0) {
+        	$query->where('start', '>=', $data['start'] . " 00:01");
+            $query->where('start', '<=', $data['start'] . " 23:59");
+        }
+
+        if (isset($data['name']) && $data['name'] != '' && $data['name'] != 'todos' && $data['name'] != 'todas') {
+        	$query->whereHas('competitors', function ($queryC) use ($data) {
+            	$queryC->whereHas('team', function ($queryT) use ($data) {
+            		$queryT->where('name', 'like', '%' . $data['name'] . '%');
+				});
+			});
+        }
+
+        $games = $query->paginate(50);
+
+        return $this->successResponse([
+            'games' => $games
+        ], 200);
+    }
 }
