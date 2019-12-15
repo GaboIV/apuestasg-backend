@@ -26,7 +26,7 @@ class AdminController extends ApiController {
         ], 200);
     }
 
-    public function loadUpdates() {
+    public function loadUpdatesLeagues() {
         $updates = Category::with("leagues")
                             ->get();
 

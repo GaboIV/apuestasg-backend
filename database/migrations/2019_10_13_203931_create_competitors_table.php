@@ -18,10 +18,10 @@ class CreateCompetitorsTable extends Migration
             $table->string('code')->unique();
             $table->string('odd');
             $table->string('link');
-            $table->string('provider');
-            $table->decimal('variant');
-            $table->boolean('status');
-            $table->unsignedBigInteger('fact');
+            $table->string('provider')->default('apuestasg.com');
+            $table->decimal('variant')->default(0);
+            $table->boolean('status')->default(0);
+            $table->unsignedBigInteger('fact')->nullable();
             $table->unsignedBigInteger('game_id');
             $table->foreign('game_id')
                 ->references('id')

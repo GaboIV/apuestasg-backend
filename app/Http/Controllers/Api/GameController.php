@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\BetType;
+use App\Competitor;
 use App\Game;
 use App\Http\Controllers\ApiController;
+use App\League;
+use App\Team;
 use Illuminate\Http\Request;
 
 class GameController extends ApiController
@@ -38,7 +42,186 @@ class GameController extends ApiController
     }
 
     public function store(Request $request) {
-        //
+        $data = $request->all();
+
+        $league = new League(['id' => $data['league_id']]);
+        $mensaje = '';
+        $estatus = 'error';
+
+        if ($data['category_id']) {
+            $bettype = BetType::whereCategoryId($data['category_id'])->first();
+
+            if ($data['league_id']) {
+                if ($data['start']) {
+                    if ($data['teams'][0]) {
+                        $team1 = Team::whereName($data['teams'][0])->first();
+
+                        if (!$team1) {
+                            $datateam1['name'] = $data['teams'][0];
+                            $datateam1['name_uk'] = $data['teams'][0];
+                            $team1 = Team::create($datateam1);
+                            $team1->leagues()->attach($data['league_id']);
+                        } else {
+                            $team_league = $team1::whereHas('leagues', function ($query) use ($data) {
+                                $query->where('league_id', $data['league_id']);
+                            })
+                            ->first();
+
+                            if (!$team_league)
+                                $team1->leagues()->attach($data['league_id']);
+                        }
+
+                        if ($data['teams'][1]) {
+                            $team2 = Team::whereName($data['teams'][1])->first();
+                            
+                            if (!$team2) {
+                                $datateam2['name'] = $data['teams'][1];
+                                $datateam2['name_uk'] = $data['teams'][1];
+                                $team2 = Team::create($datateam2);
+                                $team2->leagues()->attach($data['league_id']);
+                            } else {
+                                if ($team2->name_uk == "Draw") {
+                                    $team_league = $team2::whereHas('leagues', function ($query) use ($data) {
+                                        $query->where('league_id', $data['league_id']);
+                                    })
+                                    ->first();
+
+                                    if (!$team_league)
+                                        $team2->leagues()->attach($data['league_id']);
+                                }
+                            }
+
+                            if ($data['descripcion'][0] != '') {
+                                if ($data['descripcion'][1] != '') {
+                                    if (isset($data['teams'][2])) {
+                                        if ($data['descripcion'][0] != '') {
+                                            $team3 = Team::whereName($data['teams'][2])->first();
+
+                                            if (!$team3) {
+                                                $datateam3['name'] = $data['teams'][2];
+                                                $datateam3['name_uk'] = $data['teams'][2];
+                                                $team3 = Team::create($datateam3);
+                                                $team3->leagues()->attach($data['league_id']);
+                                            } else {
+                                                $team_league = $team3::whereHas('leagues', function ($query) use ($data) {
+                                                    $query->where('league_id', $data['league_id']);
+                                                })
+                                                ->first();
+
+                                                if (!$team_league)
+                                                    $team3->leagues()->attach($data['league_id']);
+                                            }
+                                        } else {
+                                            $mensaje = "Escriba un dividendo 3 válido";
+                                        }
+                                    }
+
+                                    if ($mensaje == '') {
+                                        $fecha = date("Y-m-d", strtotime($data['start']));
+                                        $hora = date("H:i:s", strtotime($data['start']));
+
+                                        if ( isset($data['descripcion'][2]) ){
+                                            $id_wihi_partido = $fecha.'!'.$team1->id.'.'.$team3->id.'!'.$hora;
+                                        } else {
+                                            $id_wihi_partido = $fecha.'!'.$team1->id.'.'.$team2->id.'!'.$hora;
+                                        }
+
+                                        $data['web_id'] = $id_wihi_partido;
+
+                                        $partido = Game::whereWebId($id_wihi_partido)->first();
+
+                                        if ($partido) {
+                                            $mensaje = "Este partido ya se encuentra registrado";
+                                            $estatus = "existe";
+                                        } else {
+                                            $game = Game::create($data);
+
+                                            if ($game) {
+                                                $id_wihi_part1 = $team1->id.'!'.$game->id.'!'.$bettype->id;
+                                                $id_wihi_part2 = $team2->id.'!'.$game->id.'!'.$bettype->id;
+
+                                                 if (isset($data['descripcion'][2])) {
+                                                    $id_wihi_part3 = $team3->id.'!'.$game->id.'!'.$bettype->id;
+                                                }
+
+                                                $competitor1 = Competitor::insert([
+                                                    'code' => $id_wihi_part1,
+                                                    'game_id' => $game->id,
+                                                    'team_id' => $team1->id,
+                                                    'provider' => 'apuestasg.com',
+                                                    'bet_type_id' => $bettype->id,
+                                                    'odd' => $data['descripcion'][0],
+                                                    'link' => '1'
+                                                ]);
+
+                                                if($competitor1){
+                                                    $competitor2 = Competitor::insert([
+                                                        'code' => $id_wihi_part2,
+                                                        'game_id' => $game->id,
+                                                        'team_id' => $team2->id,
+                                                        'provider' => 'apuestasg.com',
+                                                        'bet_type_id' => $bettype->id,
+                                                        'odd' => $data['descripcion'][1],
+                                                        'link' => '1'
+                                                    ]);
+
+                                                    if($competitor2){
+                                                        if (isset($data['descripcion'][2]) && isset($data['teams'][2])) {
+                                                            $competitor3 = Competitor::insert([
+                                                                'code' => $id_wihi_part3,
+                                                                'game_id' => $game->id,
+                                                                'team_id' => $team3->id,
+                                                                'provider' => 'apuestasg.com',
+                                                                'bet_type_id' => $bettype->id,
+                                                                'odd' => $data['descripcion'][2],
+                                                                'link' => '1'
+                                                            ]);
+                                                        }
+
+                                                        $mensaje = "Se creó el partido correctamente";
+                                                        $estatus = "correcto";
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    $mensaje = "Escriba un dividendo 2 válido";
+                                }
+                            } else {
+                                $mensaje = "Escriba un dividendo 1 válido";
+                            }
+                        } else {
+                            $mensaje = 'Escriba un equipo 2 válido';
+                        }
+                    } else {
+                        $mensaje = 'Escriba un equipo 1 válido';
+                    }
+                } else {
+                    $mensaje = 'Escriba una fecha válida para el partido';
+                }
+            } else {
+                $mensaje = 'Seleccione una liga válida';
+            }
+        } else {
+            $mensaje = 'Seleccione un deporte válido';
+        }
+
+        $result = array(
+            "status" => $estatus,
+            "mensaje" => $mensaje,
+            "id_categoria" => $data['category_id'],
+            "id_liga" => $data['league_id'],
+            "fecha_inicio" => $data['start'],
+            "id_wihi_partido" => $data['web_id'],
+            "equipos" => $data['teams'],
+            "tipo_apuesta" => $bettype,
+            "dividendos" => $data['descripcion']
+        );
+
+        return $this->successResponse([
+            'game' => $data
+        ], 200);
     }
 
     public function show($id) {

@@ -8,6 +8,15 @@ class Competitor extends Model
 {
     protected $with = ["team"];
 
+    protected $fillable = [
+        'code',
+        'game_id',
+        'team_id',
+        'bet_type_id',
+        'odd',
+        'link'
+    ];
+
     public function game() {
         return $this->belongsTo(Game::class, 'game_id', 'id');
     }

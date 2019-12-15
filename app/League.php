@@ -14,9 +14,7 @@ class League extends Model {
     }
 
     public function teams() {
-        return $this
-            ->belongsToMany('App\Team')
-            ->withTimestamps();
+       return $this->belongsToMany('\App\Team', 'league_team')->withTimestamps();
     }
 
     public function category() {

@@ -18,6 +18,17 @@ class TeamController extends ApiController {
         ], 200);
     }
 
+    public function byLeague($id) {
+        $teams = Team::whereHas('leagues', function ($query) use ($id) {               
+                        $query->where('league_id', $id);
+                    })
+                    ->get();
+
+        return $this->successResponse([
+            'teams' => $teams
+        ], 200);
+    }
+
     public function store(Request $request)
     {
         //
