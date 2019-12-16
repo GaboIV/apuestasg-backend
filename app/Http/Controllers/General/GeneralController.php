@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class GeneralController extends ApiController {
     public function __construct() {
-        $this->middleware('guest');
+        $this->middleware('guest')->except('getChangelog');
     }
 
     public function hora() {
@@ -63,6 +63,8 @@ class GeneralController extends ApiController {
                             $q->where('start', '<=', $fecha_manana);
                         }])
                         ->where('leagues.category_id', $id)
+                        ->orderBy('importance', 'desc')
+                        ->orderBy('id', 'desc')
                         ->get();
 
 

@@ -26,6 +26,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 	// Cerrar sesión
 	Route::get('auth/logout', 'Auth\LoginController@logout');
 
+	// Chagelog
+	Route::get('changelogs', 'Admin\AdminController@getChangelog');
+
 	// Ligas
 	Route::post('leagues/category/country', 'Api\LeagueController@byCategory');
     Route::resource('leagues', 'Api\LeagueController')->except([
