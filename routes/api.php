@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     // Partidos
 	Route::put('games/updateOutstanding/{id}', 'Api\GameController@updateOutstanding');
 	Route::post('games/byFilters', 'Api\GameController@byFilters');
+	Route::post('games/result', 'Api\GameController@resultCharge');
 	Route::resource('games', 'Api\GameController')->except([
 	    'create', 'edit'
 	]);
