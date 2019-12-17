@@ -2,14 +2,6 @@
 
 use Illuminate\Http\Request;
 
-Route::group(['prefix' => 'auth'], function () {
-    // Login de jugador y administrador
-    Route::post('/login', 'Auth\LoginController@login');
-
-    // Registro de jugador
-    Route::post('/register', 'Auth\RegisterController@createPlayer');
-});
-
 // Obtener hora
 Route::get('/hora', 'General\GeneralController@hora');
 
@@ -21,6 +13,18 @@ Route::get('/showgames/{id}', 'General\GeneralController@GamesByCategory');
 
 // Ver juegos destacados
 Route::get('/showgamesoutstanding', 'General\GeneralController@GamesOutstanding');
+
+// Subida de imágenes
+Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
+
+Route::group(['prefix' => 'auth'], function () {
+    // Login de jugador y administrador
+    Route::post('/login', 'Auth\LoginController@login');
+
+    // Registro de jugador
+    Route::post('/register', 'Auth\RegisterController@createPlayer');
+});
+
 
 Route::group(['middleware' => 'auth:api'], function () {
 	// Cerrar sesión

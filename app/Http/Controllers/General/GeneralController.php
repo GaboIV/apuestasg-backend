@@ -7,6 +7,7 @@ use App\Game;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\League;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class GeneralController extends ApiController {
@@ -131,6 +132,18 @@ class GeneralController extends ApiController {
 
         return $this->successResponse([
             'outstanding' => $destacados
+        ], 200);
+    }
+
+    public function imageUploadPost(Request $request) {
+        $data = $request->all();
+  
+        $imageName = $data['id'].'.png'; 
+   
+        $request->image->move(storage_path('app/' . $data['model']), $imageName); 
+        
+        return $this->successResponse([
+            'image' => $imageName
         ], 200);
     }
 }

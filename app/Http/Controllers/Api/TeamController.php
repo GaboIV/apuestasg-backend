@@ -9,9 +9,20 @@ use Illuminate\Http\Request;
 class TeamController extends ApiController {
 
     public function index() {
-        $teams = Team::orderBy('id', 'desc')
-                     ->with('leagues')
-                     ->paginate(30);
+
+        $criterios = explode(" ", request()->criterio);
+
+        $teams = Team::where(function($query) use($criterios){
+                    if (request()->criterio != 'todos') {
+                        foreach($criterios as $keyword) {
+                            $query->orWhere('name', 'LIKE', "%$keyword%");
+                            $query->orWhere('name_uk', 'LIKE', "%$keyword%");
+                        }
+                    }                    
+                })
+                ->orderBy('id', 'desc')
+                ->with('leagues')
+                ->paginate(50);
 
         return $this->successResponse([
             'teams' => $teams
