@@ -75,6 +75,41 @@ class GeneralController extends ApiController {
         ], 200);
     }
 
+    public function GamesBySearch(Request $request) {
+        $daynow = date("Y-m-d H:i:s");
+        $data = $request->all();
+
+        $criterios = explode(" ", $data['name']);
+
+        $juegos = League::whereHas('games', function ($query) {
+                        $query->where('start', '>=', date("Y-m-d H:i:s"));
+                    })
+                    ->with(["games" => function($q) {
+                        $q->with('competitors');
+                        if (isset($data['name']) && $data['name'] != '' && $data['name'] != 'todos' && $data['name'] != 'todas') {
+                            $q->whereHas('competitors', function ($queryC) use ($data) {
+                                $queryC->whereHas('team', function ($queryT) use ($data) {
+                                    foreach($criterios as $keyword) {
+                                        $queryT->orWhere('name', 'LIKE', "%$keyword%");
+                                        $queryT->orWhere('name_uk', 'LIKE', "%$keyword%");
+                                    }
+                                });
+                            });
+                        }   
+                        $q->where('start', '>=', date("Y-m-d H:i:s"));
+                    }])
+                    ->orderBy('importance', 'desc')
+                    ->orderBy('id', 'desc');
+
+
+
+        $games = $juegos->paginate(50);
+
+        return $this->successResponse([
+            'juegos' => $games
+        ], 200);
+    }
+
     public function GamesOutstanding() {
         $daynow = date("Y-m-d H:i:s");
         $fecha_manana = date_create($daynow);

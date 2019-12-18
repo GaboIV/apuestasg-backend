@@ -21,7 +21,7 @@ class CreateTicketsTable extends Migration
             $table->foreign('player_id')
                 ->references('id')
                 ->on('players');
-            $table->datetime('time')->default(DB::raw('CURRENT_TIMESTAMP');
+            $table->datetime('time')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->unsignedBigInteger('amount');
             $table->decimal('towin');
             $table->integer('status');

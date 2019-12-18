@@ -14,6 +14,9 @@ Route::get('/showgames/{id}', 'General\GeneralController@GamesByCategory');
 // Ver juegos destacados
 Route::get('/showgamesoutstanding', 'General\GeneralController@GamesOutstanding');
 
+// Ver equipos por búsqueda de nombre
+Route::post('games/byName', 'General\GeneralController@GamesBySearch');
+
 // Subida de imágenes
 Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
 
