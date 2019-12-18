@@ -20,4 +20,8 @@ class League extends Model {
     public function category() {
         return $this->hasOne(Category::class, 'id', 'category_id');
     }
+
+    public function country() {
+        return $this->hasOne(Country::class, 'id', 'country_id');
+    }
 }

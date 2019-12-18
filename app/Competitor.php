@@ -14,6 +14,7 @@ class Competitor extends Model
         'team_id',
         'bet_type_id',
         'odd',
+        'fact',
         'link',
         'status'
     ];

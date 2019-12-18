@@ -16,9 +16,9 @@ class CreatePitchersTable extends Migration
         Schema::create('pitchers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('era');
-            $table->string('winlose');
-            $table->string('hand');
+            $table->string('era')->nullable();
+            $table->string('winlose')->nullable();
+            $table->string('hand')->nullable();
             $table->unsignedBigInteger('team_id');
             $table->foreign('team_id')
                 ->references('id')

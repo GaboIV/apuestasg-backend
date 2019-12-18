@@ -25,6 +25,7 @@ class CreateGamesTable extends Migration
             $table->string('live_id')->nullable();
             $table->boolean('status_live_id')->nullable()->default(0);
             $table->unsignedBigInteger('league_id');
+            $table->integer('status')->default(0);
             $table->foreign('league_id')
                 ->references('id')
                 ->on('leagues');

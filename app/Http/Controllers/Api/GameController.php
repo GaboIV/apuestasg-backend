@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\BetType;
-use App\Player;
 use App\Competitor;
-use App\Ticket;
-use App\Selection;
-use App\Result;
 use App\Game;
 use App\Http\Controllers\ApiController;
 use App\League;
+use App\Pitcher;
+use App\Player;
+use App\Result;
+use App\Selection;
 use App\Team;
+use App\Ticket;
 use Illuminate\Http\Request;
 
 class GameController extends ApiController
@@ -28,6 +29,22 @@ class GameController extends ApiController
 
         return $this->successResponse([
             'games' => $games
+        ], 200);
+    }
+
+    public function one($id) {
+        $game = Game::whereId($id)
+                     ->with(["competitors" => function($q) {
+                            $q->with('team');
+                        }])
+                     ->with(["league" => function($q) {
+                            $q->with('category');
+                            $q->with('country');
+                        }])
+                     ->first();
+
+        return $this->successResponse([
+            'game' => $game
         ], 200);
     }
 
@@ -233,7 +250,70 @@ class GameController extends ApiController
     }
 
     public function update(Request $request, $id) {
-        //
+        $pitchers = $request->pitchers;
+        $partido = $request->partido;
+
+        $url = addslashes($partido['url']);
+        $fecha_pdo = $partido['start'];
+        $id_partido = $partido['id'];
+
+        $i = 0;
+
+        $equipos = $partido['competitors'];
+
+        foreach ($pitchers as $ptc) {
+            $nombre = $ptc['nombre'];
+            $era = $ptc['era'];
+
+            $id_equipo = $equipos[$i]['team']['id'];
+            $id_participante = $equipos[$i]['id'];
+
+            if ($nombre != '') {
+                $pitcher = Pitcher::whereName($nombre)->whereTeamId($id_equipo)->first();
+
+                if (!$pitcher)
+                    $pitcher = Pitcher::create($ptc);
+
+                Competitor::whereId($id_participante)->update(['fact' => $pitcher->id]);
+
+                $sta_p1 = "success";                
+            } else {
+                $sta_p1 = "success";
+            }    
+            $i++;  
+        }
+
+        Game::whereId($id_partido)->update([
+            "url" => $url,
+            "start" => $fecha_pdo
+        ]);
+
+        foreach ($equipos as $compa) {
+            $id_participante = $compa['id'];
+            $dividendo = $compa['odd'];
+
+            if ($id_participante != '' AND $dividendo != '') {
+                Competitor::whereId($id_participante)->update([
+                    "odd" => $dividendo
+                ]);
+
+                $sta_p1 = "success";                
+            }
+        }          
+
+        if ($sta_p1 == "success") {
+            $result = array(
+                "status" => $sta_p1,
+                "partido" => $partido,
+                "pitchers" => $pitchers
+            );
+        } else {
+            $result = array(
+                "status" => 'error'
+            );
+        }       
+
+        return $this->successResponse($result, 200);        
     }
 
     public function destroy($id) {
@@ -271,137 +351,6 @@ class GameController extends ApiController
 
         return $this->successResponse([
             'games' => $games
-        ], 200);
-    }
-
-    public function resultCharge(Request $request) {
-        $data = $request->all();
-        $disponible = null;
-
-        $result_exist = Result::whereGameId($data['game_id'])->first();
-
-        if (!$result_exist) {
-            $result = Result::create($data);
-
-            $res = explode('!', $data['result']);
-
-            if ($res[0] > $res[1]) {
-                $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'asc')->get('id');
-
-                $k=0;
-
-                foreach ($competitors as $cp) {
-                    if ($k == 0) {
-                        $cp->update(['status' => 1]);
-                    } else {
-                        $cp->update(array('status' => 3));
-                    }
-                    $k++;
-                }
-            } elseif ($res[0] == $res[1]) {
-                $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'asc')->get('id, team_id');
-
-                foreach ($competitors as $cp) {
-                    if ($cp->team_id == 1) {
-                        $cp->update(array('status' => 1));
-                    } else {
-                        $cp->update(array('status' => 3));
-                    }
-                }
-            } elseif ($res[0] < $res[1]) {
-                $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'desc')->get('id');
-
-                $k=0;
-
-                foreach ($competitors as $cp) {
-                    if ($k == 0) {
-                        $cp->update(array('status' => 1));
-                    } else {
-                        $cp->update(array('status' => 3));
-                    }
-                    $k++;
-                }
-            } else {
-                return $this->successResponse([
-                    "status" => "error",
-                    "mensaje" => "Error verificando tickets, por favor hágalo en la función en el módulo tickets"
-                ], 200);
-            }
-
-            $selections = Selection::whereSample($data['game_id'])
-            ->where('ticket_id', '!=', null)->get();
-
-            if (count($selections) > 0) {
-                foreach ($selections as $sel) {
-                    $codigo = $sel['ticket_id'];
-                    $disponible = 0.0001;
-                    $acumulado = 1;
-
-                    $ticket = Selection::whereTicketId($codigo)->get();
-                    $full = 'true';
-
-                    foreach ($ticket as $tik) {
-                        $id_p = $tik['select_id'];
-
-                        $competitor = Competitor::whereId($id_p)->first();
-
-                        $odd_1 = $competitor["odd"];
-
-                        $div_div = explode("/", $odd_1);
-
-                        if (!isset($div_div[1])) {
-                            $div_div[1] = 1;
-                        }                                       
-
-                        $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-
-                        if ($competitor['status'] == '1') { $acumulado = $acumulado * $decimal_odd; } 
-                        elseif ($competitor['status'] == '2') { } 
-                        elseif ($competitor['status'] == '3') { 
-                            $full = 'false';
-
-                            $parleys = Ticket::whereCode($codigo)->update(array('status' => 3));
-                        } elseif ($competitor['status'] == '0') { $full = 'pendiente'; }
-                    }
-
-                    if ($full == 'true') {
-                        $parleys = Ticket::whereId($codigo)->get();
-
-                        Ticket::whereId($codigo)->update(array('status' => 1));
-
-                        foreach ($parleys as $prly) {
-                            $id_player =  $prly['player_id'];
-                            $monto_pagar = $prly['amount'] * $acumulado;
-
-                            $player = Player::whereId($id_player)->first();
-
-                            $saldo = $player['available'];
-
-                            $nuevo_saldo =  $saldo + $monto_pagar;
-
-                            $player->update(['available' => $nuevo_saldo]);
-
-                            $disponible = floatval($nuevo_saldo);
-
-                        }
-                    }
-                }
-            }
-        } else {
-            return $this->successResponse([
-                "status" => "error",
-                "mensaje" => "Ya existente"
-            ], 200);
-        }
-
-        return $this->successResponse([
-            "status" => "correcto",
-            "disponible" => $disponible,
-            "acumulado" => $acumulado,
-            "full" => $player
         ], 200);
     }
 }
