@@ -149,24 +149,22 @@ class GeneralController extends ApiController {
         //                 ->where('leagues.category_id', $id)
         //                 ->get();
 
-        $destacados = DB::table('games') 
-            ->where('start', '>=', date("Y-m-d H:i:s"))
-            ->where('start', '<=', $fecha_manana)  
-            ->whereOutstanding(true)
-            ->limit(12)  
-            ->get();
+        // $destacados = DB::table('games') 
+        //     ->where('start', '>=', date("Y-m-d H:i:s"))
+        //     ->where('start', '<=', $fecha_manana)  
+        //     ->whereOutstanding(true)
+        //     ->limit(12)  
+        //     ->get();
+
+        $destacados = Game::where('start', '>=', date("Y-m-d H:i:s"))
+        ->whereOutstanding(true)
+        ->with('competitors')
+        ->with('league')
+        ->limit(12)  
+        ->get();
+        
 
         foreach ($destacados as $dest) {
-            $dest->league = DB::table('leagues') 
-                            ->whereId($dest->league_id)
-                            ->first();
-
-            $dest->competitors = DB::table('competitors') 
-                            ->whereGameId($dest->id)
-                            ->join('teams', 'teams.id', '=', 'competitors.team_id')
-                            ->select('competitors.*','teams.name')
-                            ->get();
-
             foreach ($dest->competitors as $comp) {
                 $file = storage_path("app/teams/" . $comp->team_id . ".png");
 
@@ -176,6 +174,11 @@ class GeneralController extends ApiController {
                     $comp->image = $comp->team_id . ".png";
                 }
             }
+
+            if (count($dest->competitors) == 2)
+                $dest['encuentro'] = $dest->competitors[0]['team']['name'] . " vs " . $dest->competitors[1]['team']['name'];
+            elseif (count($dest->competitors) == 3)
+                $dest['encuentro'] = $dest->competitors[0]['team']['name'] . " vs " . $dest->competitors[2]['team']['name']; 
 
             $file = storage_path("app/games/" . $dest->id . ".jpg");
 
