@@ -52,23 +52,44 @@ class GeneralController extends ApiController {
         $daynow = date("Y-m-d H:i:s");
         $fecha_manana = date_create($daynow);
         date_add($fecha_manana, date_interval_create_from_date_string('1 days'));
+        $mananna = $fecha_manana;
         $fecha_manana = date_format($fecha_manana, 'Y-m-d H:i:s');
 
-        $juegos = League::whereHas('games', function ($query) use ($fecha_manana) {
-                            $query->where('start', '>=', date("Y-m-d H:i:s"));
-                            $query->where('start', '<=', $fecha_manana);
-                        })
-                        ->with(["games" => function($q) use ($fecha_manana) {
-                            $q->with('competitors');
-                            $q->where('start', '>=', date("Y-m-d H:i:s"));
-                            $q->where('start', '<=', $fecha_manana);
-                        }])
-                        ->where('leagues.category_id', $id)
-                        ->orderBy('importance', 'desc')
-                        ->orderBy('id', 'desc')
-                        ->get();
+        $liga_name = "XYrRTTEddef3";
+        $liga_date = "XYrRTRdfsgg3";
 
+        $juegos = Game::where('start', '>=', date("Y-m-d H:i:s"))
+        ->where('start', '<=', $fecha_manana)
+        ->with('competitors')
+        ->with('league')
+        ->whereHas('league', function ($query) use ($id) {
+            $query->where('category_id', $id);
+            $query->orderBy('importance', 'desc');
+        })
+        ->orderBy('league_id', 'desc')
+        ->orderBy('start', 'asc')
+        // ->orderBy('league.importance', 'desc')
+        ->orderBy('id', 'desc')
+        ->get();
 
+        foreach ($juegos as $juego) {
+            if ($juego->league_id != $liga_name){
+                $liga_name = $juego->league_id;
+                $juego['league_name'] = $juego->league->name;
+            }
+
+            if ((date('d', strtotime($juego->start)) - date('d') == 1) && $juego->league_id != $liga_date) {
+                $juego['manana'] = true;
+                $liga_date = $juego->league_id;
+            }    
+
+            if (count($juego->competitors) == 2)
+            $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[1]['team']['name'];
+            elseif (count($juego->competitors) == 3)
+                $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[2]['team']['name'];        
+        }
+
+        
 
         return $this->successResponse([
             'juegos' => $juegos

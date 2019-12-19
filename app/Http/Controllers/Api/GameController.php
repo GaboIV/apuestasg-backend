@@ -262,24 +262,27 @@ class GameController extends ApiController
         $equipos = $partido['competitors'];
 
         foreach ($pitchers as $ptc) {
-            $nombre = $ptc['nombre'];
-            $era = $ptc['era'];
+            if (isset($ptc['nombre'])) {
+                $nombre = $ptc['nombre'];
+                $era = $ptc['era'];
 
-            $id_equipo = $equipos[$i]['team']['id'];
-            $id_participante = $equipos[$i]['id'];
+                $id_equipo = $equipos[$i]['team']['id'];
+                $id_participante = $equipos[$i]['id'];
 
-            if ($nombre != '') {
-                $pitcher = Pitcher::whereName($nombre)->whereTeamId($id_equipo)->first();
+                if ($nombre != '') {
+                    $pitcher = Pitcher::whereName($nombre)->whereTeamId($id_equipo)->first();
 
-                if (!$pitcher)
-                    $pitcher = Pitcher::create($ptc);
+                    if (!$pitcher)
+                        $pitcher = Pitcher::create($ptc);
 
-                Competitor::whereId($id_participante)->update(['fact' => $pitcher->id]);
+                    Competitor::whereId($id_participante)->update(['fact' => $pitcher->id]);
 
-                $sta_p1 = "success";                
-            } else {
-                $sta_p1 = "success";
-            }    
+                    $sta_p1 = "success";                
+                } else {
+                    $sta_p1 = "success";
+                } 
+            }
+               
             $i++;  
         }
 
