@@ -34,13 +34,16 @@ class SessionController extends ApiController {
 
                     $id_part_2 = $sel->competitor["id"];
                     $id_equipo = $sel->competitor["team_id"];
-                    $div_equipo_part1 = $sel->competitor["odd"];
+                    $div_equipo_part1 = $sel["value"];
 
                     $div_div = explode("/", $div_equipo_part1);
 
                     if (!isset($div_div[1])) {
                         $div_div[1] = 1;
                     }
+
+                    $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
+                    $decim_tot = $decim_tot * $decimal_odd;
 
                     foreach ($sel->game->competitors as $comp) {
                         if ($comp->id == $sel->select_id) {
@@ -71,7 +74,7 @@ class SessionController extends ApiController {
         return $this->successResponse([
             "tipo" => $tipo,
             "selecciones" => $selecciones,
-            "cuota" => $decim_tot
+            "quot" => $decim_tot
         ], 200);
     }
 
@@ -87,16 +90,18 @@ class SessionController extends ApiController {
         $tipo = '';
         
         $exists = Selection::whereSelectId($data['bet_id'])
-                    ->where('player_id', $player->id)
-                    ->where(function ($query) {
-                        $query->where('ticket_id', '0')
-                              ->orWhere('ticket_id', '')
-                              ->orWhere('ticket_id', null);
-                    })
-                    ->first();
+        ->where('player_id', $player->id)
+        ->where(function ($query) {
+            $query->where('ticket_id', '0')
+                  ->orWhere('ticket_id', '')
+                  ->orWhere('ticket_id', null);
+        })
+        ->first();
 
         if ($exists) {
             $exists->delete();
+            $status= "success"; 
+            $mstatus = "Selección eliminada";
         } else {
             $competitor = Competitor::whereId($data['bet_id'])->first();
 
@@ -104,16 +109,17 @@ class SessionController extends ApiController {
             $game_id = $competitor["game_id"];
 
             $exists2 = Selection::whereSample($game_id)
-                    ->where('player_id', $player->id)
-                    ->where(function ($query) {
-                        $query->where('ticket_id', '0')
-                              ->orWhere('ticket_id', '')
-                              ->orWhere('ticket_id', null);
-                    })
-                    ->get();
+            ->where('player_id', $player->id)
+            ->where(function ($query) {
+                $query->where('ticket_id', '0')
+                      ->orWhere('ticket_id', '')
+                      ->orWhere('ticket_id', null);
+            })
+            ->get();
 
             if (count($exists2) > 0) {
-
+                $status = "info";
+                $mstatus = "Ya tiene una selección para este encuentro deportivo";
             } else {
                 $selection = new Selection;
                 $selection->select_id = $data['bet_id'];
@@ -123,6 +129,9 @@ class SessionController extends ApiController {
                 $selection->ticket_id = null;
 
                 $player->selections()->save($selection);
+
+                $status = "success";
+                $mstatus = "Selección agregada";
             }               
         }
 
@@ -133,7 +142,7 @@ class SessionController extends ApiController {
             if ($sel->game->start <= date("Y-m-d H:i:s")) {
                 $sel->delete();
             } else {
-                $odd_fracc = $sel[$i]["value"];
+                $odd_fracc = $sel["value"];
                 $div_div = explode("/", $odd_fracc);
                 if (!isset($div_div[1])) {
                     $div_div[1] = 1;
@@ -160,7 +169,10 @@ class SessionController extends ApiController {
             }
         }
 
+
         return $this->successResponse([
+            "status" => $status,
+            "mstatus" => $mstatus,
             'selections' => $selecciones,
             'quot' => $decim_tot
         ], 200);

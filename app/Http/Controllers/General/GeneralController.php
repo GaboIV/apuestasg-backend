@@ -100,34 +100,39 @@ class GeneralController extends ApiController {
         $daynow = date("Y-m-d H:i:s");
         $data = $request->all();
 
+        $liga_name = "XYrRTTEddef3";
+
         $criterios = explode(" ", $data['name']);
 
-        $juegos = League::whereHas('games', function ($query) {
-                        $query->where('start', '>=', date("Y-m-d H:i:s"));
-                    })
-                    ->with(["games" => function($q) {
-                        $q->with('competitors');
-                        if (isset($data['name']) && $data['name'] != '' && $data['name'] != 'todos' && $data['name'] != 'todas') {
-                            $q->whereHas('competitors', function ($queryC) use ($data) {
-                                $queryC->whereHas('team', function ($queryT) use ($data) {
-                                    foreach($criterios as $keyword) {
-                                        $queryT->orWhere('name', 'LIKE', "%$keyword%");
-                                        $queryT->orWhere('name_uk', 'LIKE', "%$keyword%");
-                                    }
-                                });
-                            });
-                        }   
-                        $q->where('start', '>=', date("Y-m-d H:i:s"));
-                    }])
-                    ->orderBy('importance', 'desc')
-                    ->orderBy('id', 'desc');
+        $juegos = Game::where('start', '>=', date("Y-m-d H:i:s"))
+        ->with('competitors')
+        ->with('league')
+        ->whereHas('competitors.team', function ($queryC) use ($criterios) {
 
+                foreach($criterios as $keyword) {
+                    $queryC->Where('name', 'LIKE', "%$keyword%");
+                }
+           
+        })
+        ->orderBy('league_id', 'desc')
+        ->orderBy('start', 'asc')
+        ->orderBy('id', 'desc')
+        ->paginate(50);
 
+        foreach ($juegos as $juego) {
+            if ($juego->league_id != $liga_name){
+                $liga_name = $juego->league_id;
+                $juego['league_name'] = $juego->league->name;
+            }
 
-        $games = $juegos->paginate(50);
+            if (count($juego->competitors) == 2)
+                $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[1]['team']['name'];
+            elseif (count($juego->competitors) == 3)
+                $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[2]['team']['name'];  
+        }
 
         return $this->successResponse([
-            'juegos' => $games
+            'juegos' => $juegos
         ], 200);
     }
 
