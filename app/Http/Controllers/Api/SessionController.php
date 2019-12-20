@@ -143,6 +143,8 @@ class SessionController extends ApiController {
 
                 if (count($sel->game->competitors) == '3') {
                     $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][2]['team']['name'];
+                } elseif (count($sel->game->competitors) == '2') {
+                    $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][1]['team']['name'];
                 }
 
                 foreach ($sel->game->competitors as $comp) {

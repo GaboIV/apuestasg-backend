@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\League;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Input\Input;
 
 class GeneralController extends ApiController {
     public function __construct() {
@@ -48,7 +49,7 @@ class GeneralController extends ApiController {
         ], 200);
     }
 
-    public function GamesByCategory($id) {
+    public function GamesByCategory($id, Request $request) {
         $daynow = date("Y-m-d H:i:s");
         $fecha_manana = date_create($daynow);
         date_add($fecha_manana, date_interval_create_from_date_string('1 days'));
@@ -58,17 +59,27 @@ class GeneralController extends ApiController {
         $liga_name = "XYrRTTEddef3";
         $liga_date = "XYrRTRdfsgg3";
 
-        $juegos = Game::where('start', '>=', date("Y-m-d H:i:s"))
-        ->where('start', '<=', $fecha_manana)
-        ->with('competitors')
-        ->with('league')
+        $q = Game::where('start', '>=', date("Y-m-d H:i:s"));
+        if ($request->radio == '24') {
+            $q->where('start', '<=', $fecha_manana);
+        } elseif ($request->radio == 'today') {
+            $q->where('start', '<=',date("Y-m-d") . " 23:59");
+        }
+        
+        $juegos = $q->with('competitors')
+        ->with(array('league' => function($query) {
+            $query->orderBy('importance', 'DESC');
+        }))
         ->whereHas('league', function ($query) use ($id) {
             $query->where('category_id', $id);
             $query->orderBy('importance', 'desc');
         })
+        ->join('leagues', 'games.league_id', '=', 'leagues.id')
+        ->select('games.*', 'leagues.name', 'leagues.importance')
+        ->orderBy('leagues.importance', 'desc')
         ->orderBy('league_id', 'desc')
         ->orderBy('start', 'asc')
-        // ->orderBy('league.importance', 'desc')
+        
         ->orderBy('id', 'desc')
         ->get();
 
