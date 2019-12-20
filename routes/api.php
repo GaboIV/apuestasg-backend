@@ -74,5 +74,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::delete('/selections/delete/{id}', 'Api\SessionController@deleteSelect');
         Route::post('/login', 'Api\SessionController@login');
         Route::post('/ticket/add', 'Api\TicketController@add');
+        Route::get('/ticket/load', 'Api\TicketController@loadTickets');
     });
 });

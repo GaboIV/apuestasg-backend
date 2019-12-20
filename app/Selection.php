@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Selection extends Model {
 
+    protected $appends = ['team_name', 'status'];
+
 	protected $fillable = [
         'ticket_id', 'player_id'
     ];
@@ -21,7 +23,29 @@ class Selection extends Model {
         return $this->belongsTo(Game::class, 'sample', 'id');
     }
 
-    // public function competitor() {
-    //     return $this->belongsTo(Competitor::class, 'select_id', 'id');
-    // }
+    public function getTeamNameAttribute() { 
+        $name_selection = null;
+        $competitors = $this->game->competitors;
+        
+        foreach ($competitors as $com) {
+            if ($this->select_id == $com->id) {
+                $name_selection = $com->team->name;
+            }
+        }       
+
+        return $name_selection;
+    }
+
+    public function getStatusAttribute() { 
+        $status_selection = null;
+        $competitors = $this->game->competitors;
+        
+        foreach ($competitors as $com) {
+            if ($this->select_id == $com->id) {
+                $status_selection = $com->status;
+            }
+        }       
+
+        return $status_selection;
+    }
 }

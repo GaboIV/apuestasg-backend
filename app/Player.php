@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Selection;
+use App\Ticket;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -56,5 +57,11 @@ class Player extends Model
         return $this->hasMany(Selection::class)
         ->where('ticket_id', null)
         ->with('game.competitors');
+    }
+
+    public function tickets() {
+        return $this->hasMany(Ticket::class)
+        ->orderBy('created_at', 'desc')
+        ->with('selections');
     }
 }

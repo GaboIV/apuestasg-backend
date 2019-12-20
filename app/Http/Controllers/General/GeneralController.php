@@ -92,12 +92,7 @@ class GeneralController extends ApiController {
             if ((date('d', strtotime($juego->start)) - date('d') == 1) && $juego->league_id != $liga_date) {
                 $juego['manana'] = true;
                 $liga_date = $juego->league_id;
-            }    
-
-            if (count($juego->competitors) == 2)
-            $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[1]['team']['name'];
-            elseif (count($juego->competitors) == 3)
-                $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[2]['team']['name'];        
+            }          
         }
 
         
@@ -134,12 +129,7 @@ class GeneralController extends ApiController {
             if ($juego->league_id != $liga_name){
                 $liga_name = $juego->league_id;
                 $juego['league_name'] = $juego->league->name;
-            }
-
-            if (count($juego->competitors) == 2)
-                $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[1]['team']['name'];
-            elseif (count($juego->competitors) == 3)
-                $juego['encuentro'] = $juego->competitors[0]['team']['name'] . " vs " . $juego->competitors[2]['team']['name'];  
+            } 
         }
 
         return $this->successResponse([
@@ -190,11 +180,6 @@ class GeneralController extends ApiController {
                     $comp->image = $comp->team_id . ".png";
                 }
             }
-
-            if (count($dest->competitors) == 2)
-                $dest['encuentro'] = $dest->competitors[0]['team']['name'] . " vs " . $dest->competitors[1]['team']['name'];
-            elseif (count($dest->competitors) == 3)
-                $dest['encuentro'] = $dest->competitors[0]['team']['name'] . " vs " . $dest->competitors[2]['team']['name']; 
 
             $file = storage_path("app/games/" . $dest->id . ".jpg");
 

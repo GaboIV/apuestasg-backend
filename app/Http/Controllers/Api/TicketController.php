@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\DB;
 
 class TicketController extends ApiController
 {
+	public function loadTickets (Request $request) {
+		$decim_tot = 1;
+    	$cod_temp = '';
+    	$i = 0;
+	    $n = 0;
+	    $vuelta = 0;
+
+	    $user = Auth::user();
+        $player = $user->player;
+
+        $ticketes = $player->tickets;
+
+        return $this->successResponse($ticketes, 200);
+	}
+
     public function add(Request $request) {
         $user = Auth::user();
         $player = $user->player;
@@ -89,7 +104,9 @@ class TicketController extends ApiController
 				    	'player_id' => $player->id,
 				    	'amount' => $monto,
 				    	'towin' => $towin,
-				    	'status' => 0
+				    	'status' => 0,
+				    	'created_at' => date('Y-m-d H:i:s'),
+				    	'updated_at' => date('Y-m-d H:i:s')
 				    ]
 				);
 

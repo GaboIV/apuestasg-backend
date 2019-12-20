@@ -91,10 +91,10 @@ class ResultController extends ApiController {
                 }
             } elseif ($res[0] == $res[1]) {
                 $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'asc')->get('id','team_id');
+                ->without('team')->orderBy('id', 'asc')->get();
 
                 foreach ($competitors as $cp) {
-                    if ($cp->team_id == 1) {
+                    if ($cp['team_id'] == 1) {
                         $cp->update(array('status' => 1));
                     } else {
                         $cp->update(array('status' => 3));
@@ -153,7 +153,7 @@ class ResultController extends ApiController {
                         elseif ($competitor['status'] == '3') { 
                             $full = 'false';
 
-                            $parleys = Ticket::whereCode($codigo)->update(array('status' => 3));
+                            $parleys = Ticket::whereId($codigo)->update(array('status' => 3));
                         } elseif ($competitor['status'] == '0') { $full = 'pendiente'; }
                     }
 
