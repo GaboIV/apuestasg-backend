@@ -28,13 +28,13 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        // if(env('APP_DEBUG')) {
-        //     DB::listen(function($query) {
-        //         File::append(
-        //             storage_path('/logs/query.log'),
-        //             $query->sql . ' [' . implode(', ', $query->bindings) . ']' . PHP_EOL
-        //        );
-        //     });
-        // }
+        if(env('APP_DEBUG')) {
+            // DB::listen(function($query) {
+            //     File::append(
+            //         storage_path('/logs/query.log'),
+            //         $query->sql . ' [' . implode(', ', $query->bindings) . ']' . PHP_EOL
+            //    );
+            // });
+        }
     }
 }
