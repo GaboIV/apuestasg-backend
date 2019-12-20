@@ -23,7 +23,25 @@ class Player extends Model
     public static $treatments = [self::SENIOR, self::SENIORA, self::MISS, self::MISTER];
 
     protected $fillable = [
-        'user_id', 'document_type', 'document_number', 'name', 'lastname', 'birthday', 'gender', 'state', 'city', 'parish', 'phone', 'available', 'risk', 'points', 'country', 'address', 'browser', 'ip', 'treatment'
+        'user_id', 
+        'document_type', 
+        'document_number', 
+        'name', 
+        'lastname', 
+        'birthday', 
+        'gender', 
+        'state', 
+        'city', 
+        'parish', 
+        'phone', 
+        'available', 
+        'risk', 
+        'points', 
+        'country_id', 
+        'address', 
+        'browser', 
+        'ip', 
+        'treatment'
     ];
 
     public function user() {

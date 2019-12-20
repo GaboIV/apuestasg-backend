@@ -27,15 +27,15 @@ class CreatePlayersTable extends Migration
             $table->foreign('country_id')
                 ->references('id')
                 ->on('countries');
-            $table->unsignedBigInteger('state_id');
+            $table->unsignedBigInteger('state_id')->nullable();
             $table->foreign('state_id')
                 ->references('id')
                 ->on('states');
-            $table->unsignedBigInteger('city_id');
+            $table->unsignedBigInteger('city_id')->nullable();
             $table->foreign('city_id')
                 ->references('id')
                 ->on('cities');
-            $table->unsignedBigInteger('parish_id');
+            $table->unsignedBigInteger('parish_id')->nullable();
             $table->foreign('parish_id')
                 ->references('id')
                 ->on('parishes');

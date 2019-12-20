@@ -30,10 +30,16 @@ class PlayerRequest extends FormRequest
         return [
             'document_type' => 'tipo de documento',
             'document_number' => 'número de documento',
+            'language_id' => 'idioma de preferencia',
+            'timezone' => 'franja horaria',
+            'format_quot' => 'formato de cuotas de preferencia',
             'name' => 'nombre',
             'lastname' => 'apellidos',
             'birthday' => 'fecha de nacimiento',
             'password' => 'contraseña',
+            'password_confirmation' => 'verificación de password',
+            'code_security' => 'código de seguridad',
+            'code_security_confirmation' => 'verificación de código de seguridad',
             'email' => 'correo electrónico',
             'gender' => 'género',
             'state' => 'estado',
@@ -57,24 +63,28 @@ class PlayerRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'document_type' => 'required|string|in:CED,PAS',
+            'document_type' => 'required|string|in:V,E',
             'document_number' => 'required|numeric',
             'name' => 'required|string',
             'lastname' => 'required|string',
-            'birthday' => 'required|date_format:Y-m-d',
+            'birthday' => 'required|date',
             'password' => 'required|min:6|confirmed',
+            'code_security' => 'required|min:4|confirmed',
             'email' => 'required|email|unique:users,email',
-            'gender' => 'required|'.Rule::in(Player::$genders),
-            'state' => 'required|string',
-            'city' => 'required|string',
-            'parish' => 'required|string',
-            'phone' => 'numeric|unique:players,phone',
-            'address' => 'string',
+            // 'gender' => 'required|'.Rule::in(Player::$genders),
+            // 'state' => 'required|string',
+            // 'city' => 'required|string',
+            // 'parish' => 'required|string',
+            'phone' => 'string|unique:players,phone',
+            // 'address' => 'string',
             'nick' => 'required|string|unique:users,nick',
-            'country' => 'required|string',
+            'language_id' => 'required|numeric',
+            'timezone' => 'required|string',
+            'format_quot' => 'required|numeric',
+            'country_id' => 'required|numeric',
             'treatment' => 'required|string',
-            'browser' => 'string',
-            'ip' => 'string'
+            // 'browser' => 'string',
+            // 'ip' => 'string'
         ];
         if ($this->isMethod('PUT')) {
             $currentUser = Auth::user()->person->id;
