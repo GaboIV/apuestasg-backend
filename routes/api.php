@@ -75,5 +75,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('/login', 'Api\SessionController@login');
         Route::post('/ticket/add', 'Api\TicketController@add');
         Route::get('/ticket/load', 'Api\TicketController@loadTickets');
+        Route::put('/updates/personal', 'Api\PlayerController@updatePersonal');
+        Route::put('/updates/complement', 'Api\PlayerController@updatePersonal');
     });
 });

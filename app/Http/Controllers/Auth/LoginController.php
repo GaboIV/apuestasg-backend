@@ -184,21 +184,21 @@ class LoginController extends ApiController
                 'titulo' => 'Mi Cuenta',
                 'icono' => 'fa fa-universal-access',
                 'data' => 'Ir a Mi Cuenta',
-                'link' => 'miCuenta'
+                'link' => 'mi-cuenta'
             );
 
             $menu[1] = array(
                 'titulo' => 'Historial',
                 'icono' => 'fa fa-history',
                 'data' => 'Ir a Historial',
-                'link' => 'historial/'.$token['id']
+                'link' => 'historial'
             );
 
             $menu[2] = array(
                 'titulo' => 'Mensajes',
                 'icono' => 'fa fa-mail-bulk',
                 'data' => 'Ir a Mensajes',
-                'link' => 'mensajes/'.$token['id']
+                'link' => 'mensajes'
             );
 
             $menu[3] = array(
@@ -226,13 +226,13 @@ class LoginController extends ApiController
                 'titulo' => 'Estadísticas',
                 'icono' => 'fa fa-percent',
                 'data' => 'Ir a Estadísticas',
-                'link' => 'estadisticas/'.$token['id']
+                'link' => 'estadisticas'
             );
              $menu[7] = array(
                 'titulo' => 'Resultados',
                 'icono' => 'fas fa-flag-checkered',
                 'data' => 'Ir a Resultados',
-                'link' => 'verResultados'
+                'link' => 'ver-resultados'
             );
         }
 

@@ -24,7 +24,8 @@ class User extends Authenticatable
         'password', 
         'status', 
         'attemps', 
-        'web'
+        'web',
+        'code_security'
     ];
 
     /**
@@ -35,6 +36,11 @@ class User extends Authenticatable
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = bcrypt($value);
+    }
+
+    public function setCodeSecurityAttribute($value)
+    {
+        $this->attributes['code_security'] = bcrypt($value);
     }
 
     /**

@@ -39,8 +39,14 @@ class Player extends Model
         'risk', 
         'points', 
         'country_id', 
+        'state_id',
+        'city_id',
+        'parish_id',
         'address', 
         'browser', 
+        'timezone',
+        'format_quot',
+        'language_id',
         'ip', 
         'treatment'
     ];
