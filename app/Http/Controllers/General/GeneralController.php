@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\General;
 
+use App\Account;
+use App\Bank;
 use App\Category;
 use App\Game;
 use App\Http\Controllers\ApiController;
@@ -168,27 +170,6 @@ class GeneralController extends ApiController {
         ->with('league')
         ->limit(12)  
         ->get();
-        
-
-        foreach ($destacados as $dest) {
-            foreach ($dest->competitors as $comp) {
-                $file = storage_path("app/teams/" . $comp->team_id . ".png");
-
-                if(!file_exists($file)) {
-                    $comp->image = "noimage.png";
-                } else {
-                    $comp->image = $comp->team_id . ".png";
-                }
-            }
-
-            $file = storage_path("app/games/" . $dest->id . ".jpg");
-
-            if(!file_exists($file)) {
-                $dest->image = null;
-            } else {
-                $dest->image = $dest->id . ".png";
-            }
-        }
 
         return $this->successResponse([
             'outstanding' => $destacados
@@ -204,6 +185,22 @@ class GeneralController extends ApiController {
         
         return $this->successResponse([
             'image' => $imageName
+        ], 200);
+    }
+
+    public function getAccounts() {
+        $accounts = Account::get();
+
+        return $this->successResponse([
+            'accounts' => $accounts
+        ], 200);
+    }
+
+    public function getBanks() {
+        $banks = Bank::orderBy('name')->get();
+
+        return $this->successResponse([
+            'banks' => $banks
         ], 200);
     }
 }

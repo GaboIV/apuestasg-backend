@@ -5,6 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 class League extends Model {
+    protected $appends = ['image'];
+    
     protected $fillable = [
         'name', 'name_uk', 'description', 'url', 'importance', 'country_id', 'category_id'
     ];
@@ -23,5 +25,15 @@ class League extends Model {
 
     public function country() {
         return $this->hasOne(Country::class, 'id', 'country_id');
+    }
+
+    public function getImageAttribute() { 
+        $file = storage_path("app/leagues/" . $this->id . ".png");
+
+        if(!file_exists($file)) {
+            return "noimage.png";
+        } else {
+            return $this->id.".png";
+        }
     }
 }

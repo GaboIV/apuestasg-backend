@@ -17,6 +17,12 @@ Route::get('/showgamesoutstanding', 'General\GeneralController@GamesOutstanding'
 // Ver equipos por búsqueda de nombre
 Route::post('games/byName', 'General\GeneralController@GamesBySearch');
 
+// Ver cuentas de banco disponibles
+Route::get('accounts', 'General\GeneralController@getAccounts');
+
+// Ver cuentas de banco disponibles
+Route::get('banks', 'General\GeneralController@getBanks');
+
 // Subida de imágenes
 Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
 
@@ -77,5 +83,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('/ticket/load', 'Api\TicketController@loadTickets');
         Route::put('/updates/personal', 'Api\PlayerController@updatePersonal');
         Route::put('/updates/complement', 'Api\PlayerController@updatePersonal');
+        Route::post('/pays', 'Api\PlayerController@registerPay');
     });
 });

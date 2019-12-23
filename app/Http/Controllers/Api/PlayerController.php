@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
+use App\Pay;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,5 +68,35 @@ class PlayerController extends ApiController {
             'user' => $user,
             'data' => $data
         ], 200);
+    }
+
+    public function registerPay(Request $request) {
+        $data = $request->all();
+        $user = Auth::user();
+        $player = $user->player;
+
+        $pay_exist = Pay::whereReference($data['reference'])
+        ->wherePlayerId($player->id)
+        ->first();
+
+        if ($pay_exist) {
+            return $this->errorResponse("Ya has registrado un pago con esta referencia.", 409);
+        }
+
+        $data['register_date'] = $data['register_date'] + " " + $data['registro'];
+
+        $data['code'] = substr(md5(rand()),0,15);
+        $data['player_id'] = $player->id;
+        $data['email'] = $user->email;
+        $data['status'] = 0;
+
+        $pay = Pay::create($data);
+
+        $result = array(
+            "status" => "correcto",
+            "pay" => $pay
+        );
+
+        return $this->successResponse($result, 200);
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model {
 
-    protected $appends = ['encuentro'];
+    protected $appends = ['encuentro', 'image'];
 
 	protected $fillable = [
         'web_id',
@@ -32,6 +32,16 @@ class Game extends Model {
             return $competitors[0]['team']['name'] . " vs " . $competitors[2]['team']['name'];
         } else {
             return null;
+        }
+    }
+
+    public function getImageAttribute() { 
+        $file = storage_path("app/games/" . $this->id . ".png");
+
+        if(!file_exists($file)) {
+            return "noimage.png";
+        } else {
+            return $this->id.".png";
         }
     }
 }

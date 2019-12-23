@@ -11,7 +11,7 @@ class LeagueController extends ApiController {
 
     public function index() {
         $leagues = League::orderBy('id', 'desc')
-                              ->paginate(30);
+                              ->paginate(50);
 
         return $this->successResponse([
             'leagues' => $leagues
