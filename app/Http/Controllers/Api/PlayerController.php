@@ -83,7 +83,7 @@ class PlayerController extends ApiController {
             return $this->errorResponse("Ya has registrado un pago con esta referencia.", 409);
         }
 
-        $data['register_date'] = $data['register_date'] + " " + $data['registro'];
+        // $data['register_date'] = $data['register_date'] + " " + $data['registro'];
 
         $data['code'] = substr(md5(rand()),0,15);
         $data['player_id'] = $player->id;

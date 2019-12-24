@@ -42,9 +42,9 @@ class CreatePlayersTable extends Migration
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->enum('treatment', Player::$treatments);
-            $table->decimal('available')->default(0);
-            $table->decimal('risk')->default(0);
-            $table->decimal('points')->default(0);
+            $table->decimal('available', 17,2)->default(0);
+            $table->decimal('risk', 17,2)->default(0);
+            $table->decimal('points', 17,2)->default(0);
             $table->string('ip')->nullable();
             $table->string('browser')->nullable();
             $table->foreign('user_id')
