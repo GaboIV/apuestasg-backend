@@ -76,6 +76,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 	// Jugadores
 	Route::group(['prefix' => 'player'], function () {
         Route::get('/selections/load', 'Api\SessionController@loadSelections');
+        Route::get('/transactions', 'Api\PlayerController@getTransactions');
         Route::post('/selections/add', 'Api\SessionController@select');
         Route::delete('/selections/delete/{id}', 'Api\SessionController@deleteSelect');
         Route::post('/login', 'Api\SessionController@login');
@@ -83,6 +84,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('/ticket/load', 'Api\TicketController@loadTickets');
         Route::put('/updates/personal', 'Api\PlayerController@updatePersonal');
         Route::put('/updates/complement', 'Api\PlayerController@updatePersonal');
-        Route::post('/pays', 'Api\PlayerController@registerPay');
+		Route::post('/pays', 'Api\PlayerController@registerPay');
+		Route::get('/pays', 'Api\PlayerController@getPays');
     });
 });

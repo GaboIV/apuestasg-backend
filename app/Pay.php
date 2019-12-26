@@ -5,6 +5,9 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 class Pay extends Model {
+
+    protected $with = ["bank", "account"];
+
     protected $fillable = [
         'code',
         'document',
@@ -17,4 +20,16 @@ class Pay extends Model {
         'bank_id',
         'account_id'
     ];
+
+    public function player() {
+        return $this->belongsTo(Player::class);
+    }
+
+    public function bank() {
+        return $this->belongsTo(Bank::class);
+    }
+
+    public function account() {
+        return $this->belongsTo(Account::class);
+    }
 }

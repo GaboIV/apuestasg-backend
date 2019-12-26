@@ -372,16 +372,31 @@ class SessionController extends ApiController {
             );
 
             $menu[6] = array(
+                'titulo' => 'Depósitos',
+                'icono' => 'fas fa-stream',
+                'data' => 'Ir a página de historial de depósitos',
+                'link' => 'depositos'
+            );
+
+            $menu[7] = array(
+                'titulo' => 'Transacciones',
+                'icono' => 'fas fa-file-invoice',
+                'data' => 'Ir a transacciones',
+                'link' => 'transacciones'
+            );
+
+            $menu[8] = array(
                 'titulo' => 'Estadísticas',
                 'icono' => 'fa fa-percent',
                 'data' => 'Ir a Estadísticas',
-                'link' => 'estadisticas/'
+                'link' => 'estadisticas'
             );
-             $menu[7] = array(
+
+             $menu[9] = array(
                 'titulo' => 'Resultados',
                 'icono' => 'fas fa-flag-checkered',
                 'data' => 'Ir a Resultados',
-                'link' => 'verResultados'
+                'link' => 'ver-resultados'
             );
         }
 

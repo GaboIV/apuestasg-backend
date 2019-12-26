@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
 use App\Pay;
+use App\Selection;
+use App\Transaction;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,6 +97,38 @@ class PlayerController extends ApiController {
         $result = array(
             "status" => "correcto",
             "pay" => $pay
+        );
+
+        return $this->successResponse($result, 200);
+    }
+
+    public function getTransactions() {
+        $user = Auth::user();
+        $player = $user->player;
+
+        $transactions = Transaction::wherePlayerId($player->id)
+        ->orderBy('created_at', 'desc')
+        ->paginate(50);
+
+        $result = array(
+            "status" => "correcto",
+            "transactions" => $transactions
+        );
+
+        return $this->successResponse($result, 200);
+    }
+
+    public function getPays() {
+        $user = Auth::user();
+        $player = $user->player;
+
+        $pays = Pay::wherePlayerId($player->id)
+        ->orderBy('created_at', 'desc')
+        ->paginate(50);
+
+        $result = array(
+            "status" => "correcto",
+            "pays" => $pays
         );
 
         return $this->successResponse($result, 200);

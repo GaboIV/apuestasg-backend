@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\ApiController;
-use App\Role;
-use App\User;
-use App\Player;
 use App\Http\Requests\PlayerRequest;
+use App\Player;
+use App\Role;
+use App\Transaction;
+use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends ApiController
@@ -89,6 +90,8 @@ class RegisterController extends ApiController
         
         $user->player()->create($data); 
 
+        $player = $user->player;
+
         $encab = "Usuario creado correctamente";
         $status = "success";
         $mstatus = "Tiene un regalo de Bs. 100.000,00 para que disfrute de la pasión de las apuestas.";
@@ -120,6 +123,15 @@ class RegisterController extends ApiController
         //         }
         //     }
         // }
+        // 
+        if ($data['bonus'] == "ENTRADA_100K_AG") {
+            $transaction = Transaction::create([
+                "event_type_id" => 4,
+                "player_id" => $player->id,
+                "amount" => 100000,
+                "player_balance" => 100000
+            ]);
+        }        
 
         $result = array(
             "status" => $status,

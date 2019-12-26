@@ -4,6 +4,7 @@ namespace App;
 
 use App\Selection;
 use App\Ticket;
+use App\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -69,5 +70,10 @@ class Player extends Model
         return $this->hasMany(Ticket::class)
         ->orderBy('created_at', 'desc')
         ->with('selections');
+    }
+
+    public function transactions() {
+        return $this->hasMany(Transaction::class)
+        ->orderBy('created_at', 'desc');
     }
 }

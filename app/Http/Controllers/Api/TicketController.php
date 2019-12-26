@@ -8,6 +8,7 @@ use App\League;
 use App\Selection;
 use App\Team;
 use App\Ticket;
+use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -133,6 +134,14 @@ class TicketController extends ApiController
 					$ticketes[0]['id_seleccion'] = $sel['select_id'];
 
 					$nuevo_d = $player->available - $monto; 
+
+					$transaction = Transaction::create([
+						"event_type_id" => 1,
+						"player_id" => $player->id,
+						"ticket_id" => $cod_serial,
+						"amount" => $monto,
+						"player_balance" => $nuevo_d
+					]);
 
 					$player->available = $nuevo_d;
 					if ($player->update()) {

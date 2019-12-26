@@ -9,6 +9,7 @@ use App\Player;
 use App\Result;
 use App\Selection;
 use App\Ticket;
+use App\Transaction;
 use Illuminate\Http\Request;
 
 class ResultController extends ApiController {
@@ -176,6 +177,13 @@ class ResultController extends ApiController {
 
                             $disponible = floatval($nuevo_saldo);
 
+                            $transaction = Transaction::create([
+                                "event_type_id" => 3,
+                                "player_id" => $player->id,
+                                "ticket_id" => $prly->code,
+                                "amount" => $monto_pagar,
+                                "player_balance" => $nuevo_saldo
+                            ]);
                         }
                     }
                 }
