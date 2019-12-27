@@ -86,5 +86,19 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::put('/updates/complement', 'Api\PlayerController@updatePersonal');
 		Route::post('/pays', 'Api\PlayerController@registerPay');
 		Route::get('/pays', 'Api\PlayerController@getPays');
+	});
+	
+	// Caballos
+	Route::group(['prefix' => 'horses'], function () {
+        Route::get('', 'Api\HorseController@getHorses');
+        Route::put('/{id}', 'Api\HorseController@update');
+
+        Route::get('/madrillasui', 'Api\HorseController@getMadrillasUi');
+        Route::post('/madrillas', 'Api\HorseController@addMadrilla');
+
+        Route::get('/padrillosui', 'Api\HorseController@getPadrillosUi');
+        Route::post('/padrillos', 'Api\HorseController@addPadrillo');
+
+        Route::get('/haras', 'Api\HorseController@getHaras');
     });
 });
