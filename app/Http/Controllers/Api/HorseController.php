@@ -2,16 +2,30 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Career;
 use App\Haras;
 use App\Horse;
 use App\Http\Controllers\ApiController;
+use App\Jockey;
+use App\Racecourse;
+use App\Stud;
+use App\Trainer;
 use Illuminate\Http\Request;
 
 class HorseController extends ApiController {
     public function getHorses() {
-        $horses = Horse::orderBy('name', 'asc')
-                    ->whereBreed('')
-                    ->paginate(50);
+        $criterios = explode(" ", request()->criterio);
+        
+        $horses = Horse::where(function($query) use($criterios){
+                    if (request()->criterio != 'todos') {
+                        foreach($criterios as $keyword) {
+                            $query->orWhere('name', 'LIKE', "%$keyword%");
+                        }
+                    }                    
+                })
+                ->orderBy('name', 'asc')
+                ->whereBreed('')
+                ->paginate(50);
 
         return $this->successResponse([
             'status' => 'correcto',
@@ -206,6 +220,109 @@ class HorseController extends ApiController {
         return $this->successResponse([
             'status' => 'correcto',
             'haras' => $haras,
+            'time' => date("Y-m-d H:i:s")
+        ], 200);
+    }
+
+    public function getJockeys() {
+        $criterios = explode(" ", request()->criterio);
+
+        $jockeys = Jockey::orderBy('name', 'asc')
+        ->where(function($query) use($criterios){
+            if (request()->criterio != 'todos') {
+                foreach($criterios as $keyword) {
+                    $query->orWhere('name', 'LIKE', "%$keyword%");
+                }
+            }                    
+        })
+        ->paginate('50');
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'jockeys' => $jockeys,
+            'time' => date("Y-m-d H:i:s")
+        ], 200);
+    }
+
+    public function getTrainers() {
+        $criterios = explode(" ", request()->criterio);
+
+        $trainers = Trainer::orderBy('name', 'asc')
+        ->where(function($query) use($criterios){
+            if (request()->criterio != 'todos') {
+                foreach($criterios as $keyword) {
+                    $query->orWhere('name', 'LIKE', "%$keyword%");
+                }
+            }                    
+        })
+        ->paginate('50');
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'trainers' => $trainers,
+            'time' => date("Y-m-d H:i:s")
+        ], 200);
+    }
+
+    public function getStuds() {
+        $criterios = explode(" ", request()->criterio);
+
+        $studs = Stud::orderBy('name', 'asc')
+        ->where(function($query) use($criterios){
+            if (request()->criterio != 'todos') {
+                foreach($criterios as $keyword) {
+                    $query->orWhere('name', 'LIKE', "%$keyword%");
+                }
+            }                    
+        })
+        ->paginate('50');
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'studs' => $studs,
+            'time' => date("Y-m-d H:i:s")
+        ], 200);
+    }
+
+    public function getRacecourses() {
+        $racecourses = Racecourse::orderBy('name', 'asc')
+                    ->get();
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'hipodromos' => $racecourses,
+            'time' => date("Y-m-d H:i:s")
+        ], 200);
+    }
+
+    public function getCareers($id) {
+        $i = 0;
+        $indice = '';
+        $indice2 = '';
+        $carreras = [];
+        $fecha_for_1 = date("Y-m-d H:i:s");
+
+        $query = Career::orderBy('racecourse_id', 'Desc');
+
+        // $query->where('date', '>=', $fecha_for_1);
+
+        if ($id != 'todas') {
+            $query->whereId($data['id']);
+        }
+
+        if (isset(request()->inscriptions) && request()->inscriptions == 1) {
+            $query->with('inscriptions');
+            $careers = $query->get()
+                             ->map->append('inscripcion');
+        } else {
+            $careers = $query->paginate(50);
+        }
+
+        
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'carreras' => $careers,
             'time' => date("Y-m-d H:i:s")
         ], 200);
     }

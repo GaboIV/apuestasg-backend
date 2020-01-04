@@ -101,4 +101,29 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::get('/haras', 'Api\HorseController@getHaras');
     });
+
+	// Jinetes
+    Route::group(['prefix' => 'jockeys'], function () {
+        Route::get('', 'Api\HorseController@getJockeys');
+    });
+
+    // Entrenadores
+    Route::group(['prefix' => 'trainers'], function () {
+        Route::get('', 'Api\HorseController@getTrainers');
+    });
+
+    // Studs
+    Route::group(['prefix' => 'studs'], function () {
+        Route::get('', 'Api\HorseController@getStuds');
+    });
+
+    // Studs
+    Route::group(['prefix' => 'racecourses'], function () {
+        Route::get('', 'Api\HorseController@getRacecourses');
+    });
+
+    // Studs
+    Route::group(['prefix' => 'careers'], function () {
+        Route::get('/{id}', 'Api\HorseController@getCareers');
+    });
 });

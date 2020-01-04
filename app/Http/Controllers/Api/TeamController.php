@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 class TeamController extends ApiController {
 
     public function index() {
-
         $criterios = explode(" ", request()->criterio);
 
         $teams = Team::where(function($query) use($criterios){

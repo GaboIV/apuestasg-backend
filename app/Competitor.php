@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Competitor extends Model
-{
+class Competitor extends Model {
+    
     protected $with = ["team"];
 
     protected $fillable = [

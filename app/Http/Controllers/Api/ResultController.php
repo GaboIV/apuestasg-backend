@@ -43,7 +43,9 @@ class ResultController extends ApiController {
             });
         }
 
-        $games = $query->paginate(50);
+        $games = $query
+        ->orderBy('start', 'asc')
+        ->paginate(50);
 
         foreach ($games as $game) {
             if ($game->status == 3) {
