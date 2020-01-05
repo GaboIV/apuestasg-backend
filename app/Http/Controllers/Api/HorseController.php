@@ -294,36 +294,4 @@ class HorseController extends ApiController {
             'time' => date("Y-m-d H:i:s")
         ], 200);
     }
-
-    public function getCareers($id) {
-        $i = 0;
-        $indice = '';
-        $indice2 = '';
-        $carreras = [];
-        $fecha_for_1 = date("Y-m-d H:i:s");
-
-        $query = Career::orderBy('racecourse_id', 'Desc');
-
-        // $query->where('date', '>=', $fecha_for_1);
-
-        if ($id != 'todas') {
-            $query->whereId($data['id']);
-        }
-
-        if (isset(request()->inscriptions) && request()->inscriptions == 1) {
-            $query->with('inscriptions');
-            $careers = $query->get()
-                             ->map->append('inscripcion');
-        } else {
-            $careers = $query->paginate(50);
-        }
-
-        
-
-        return $this->successResponse([
-            'status' => 'correcto',
-            'carreras' => $careers,
-            'time' => date("Y-m-d H:i:s")
-        ], 200);
-    }
 }

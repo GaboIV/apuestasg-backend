@@ -6,6 +6,7 @@ use App\Competitor;
 use App\Game;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\LoginRequest;
+use App\Inscription;
 use App\Selection;
 use App\Team;
 use Illuminate\Http\Request;
@@ -24,12 +25,26 @@ class SessionController extends ApiController {
         $i = 0;
 
         foreach ($selections as $sel) {
-            if ($sel->game->start <= date("Y-m-d H:i:s")) {
-                $sel->delete();
-            } else {
-                if ($sel['category_id'] == '7') {
-                    
+            if ($sel->category_id == 7) {
+                $tipo = "7";
+
+                if ($sel->career->date <= date("Y-m-d H:i:s")) {
+                    $sel->delete();
                 } else {
+                    $oins = Inscription::whereId($sel->select_id)->first();
+
+                    $selecciones[$i]['id'] = $sel->id;
+                    $selecciones[$i]['numero'] = $oins->number;
+                    $selecciones[$i]['horse'] = $oins->horse->name;
+                    $selecciones[$i]['carrera'] = $sel->career->number;
+                    $selecciones[$i]['hipodromo'] = $sel->career->racecourse->name;
+                    $selecciones[$i]['fecha_hora'] = $sel->career->date;
+                }
+                $i++; 
+            } else {
+                if ($sel->game->start <= date("Y-m-d H:i:s")) {
+                    $sel->delete();
+                } else {                    
                     $tipo = "2x";
 
                     $id_part_2 = $sel->competitor["id"];
@@ -65,10 +80,11 @@ class SessionController extends ApiController {
                     if (count($sel->game->competitors) == 2)
                         $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
                     elseif (count($sel->game->competitors) == 3)
-                        $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];                             
-                }
-                $i++; 
-            }             
+                        $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];
+                } 
+                $i++;  
+            }
+                       
         }
 
         return $this->successResponse([
@@ -103,80 +119,204 @@ class SessionController extends ApiController {
             $status= "success"; 
             $mstatus = "Selección eliminada";
         } else {
-            $competitor = Competitor::whereId($data['bet_id'])->first();
-
-            $odd = $competitor["odd"];
-            $game_id = $competitor["game_id"];
-
-            $exists2 = Selection::whereSample($game_id)
-            ->where('player_id', $player->id)
+            $exists1 = Selection::where('player_id', $player->id)
             ->where(function ($query) {
                 $query->where('ticket_id', '0')
                       ->orWhere('ticket_id', '')
                       ->orWhere('ticket_id', null);
             })
-            ->get();
+            ->first();
 
-            if (count($exists2) > 0) {
-                $status = "info";
-                $mstatus = "Ya tiene una selección para este encuentro deportivo";
+            if (isset($exists1) && $exists1->category_id == '7') {
+                $mstatus = "No se pueden combinar selecciones de deporte e hipismo";
+                $status = 'warning';
+                $selecciones = [];
+                $tipo = '7';
             } else {
-                $selection = new Selection;
-                $selection->select_id = $data['bet_id'];
-                $selection->sample = $game_id;
-                $selection->value = $odd;
-                $selection->category_id = $data['category_id'];
-                $selection->ticket_id = null;
+                $competitor = Competitor::whereId($data['bet_id'])->first();
 
-                $player->selections()->save($selection);
+                $odd = $competitor["odd"];
+                $game_id = $competitor["game_id"];
 
-                $status = "success";
-                $mstatus = "Selección agregada";
-            }               
+                $exists2 = Selection::whereSample($game_id)
+                ->where('player_id', $player->id)
+                ->where(function ($query) {
+                    $query->where('ticket_id', '0')
+                          ->orWhere('ticket_id', '')
+                          ->orWhere('ticket_id', null);
+                })
+                ->get();
+
+                if (count($exists2) > 0) {
+                    $status = "info";
+                    $mstatus = "Ya tiene una selección para este encuentro deportivo";
+                } else {
+                    $selection = new Selection;
+                    $selection->select_id = $data['bet_id'];
+                    $selection->sample = $game_id;
+                    $selection->value = $odd;
+                    $selection->category_id = $data['category_id'];
+                    $selection->ticket_id = null;
+
+                    $player->selections()->save($selection);
+
+                    $status = "success";
+                    $mstatus = "Selección agregada";
+                } 
+            }
+                          
         }
 
-        $selections = $player->selections;
-        $i = 0;
+        if ($tipo != '7') {
+            $selections = $player->selections;
+            $i = 0;
 
-        foreach ($selections as $sel) {
-            if ($sel->game->start <= date("Y-m-d H:i:s")) {
-                $sel->delete();
-            } else {
-                $odd_fracc = $sel["value"];
-                $div_div = explode("/", $odd_fracc);
-                if (!isset($div_div[1])) {
-                    $div_div[1] = 1;
-                }       
-                $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-                $decim_tot = $decim_tot * $decimal_odd;
+            foreach ($selections as $sel) {
+                if ($sel->game->start <= date("Y-m-d H:i:s")) {
+                    $sel->delete();
+                } else {
+                    $odd_fracc = $sel["value"];
+                    $div_div = explode("/", $odd_fracc);
+                    if (!isset($div_div[1])) {
+                        $div_div[1] = 1;
+                    }       
+                    $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
+                    $decim_tot = $decim_tot * $decimal_odd;
 
-                if (count($sel->game->competitors) == '3') {
-                    $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][2]['team']['name'];
-                } elseif (count($sel->game->competitors) == '2') {
-                    $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][1]['team']['name'];
-                }
-
-                foreach ($sel->game->competitors as $comp) {
-                    if ($comp->id == $sel->select_id) {
-                        $f8 = $comp;
-                        break;
+                    if (count($sel->game->competitors) == '3') {
+                        $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][2]['team']['name'];
+                    } elseif (count($sel->game->competitors) == '2') {
+                        $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][1]['team']['name'];
                     }
+
+                    foreach ($sel->game->competitors as $comp) {
+                        if ($comp->id == $sel->select_id) {
+                            $f8 = $comp;
+                            break;
+                        }
+                    }
+
+                    $selecciones[$i]['value'] = $selections[$i]->value; 
+                    $selecciones[$i]['id'] = $selections[$i]->id;   
+                    $selecciones[$i]['equipo'] = $f8->team->name;
+
+                    $i++;
                 }
-
-                $selecciones[$i]['value'] = $selections[$i]->value; 
-                $selecciones[$i]['id'] = $selections[$i]->id;   
-                $selecciones[$i]['equipo'] = $f8->team->name;
-
-                $i++;
             }
         }
-
 
         return $this->successResponse([
             "status" => $status,
             "mstatus" => $mstatus,
             'selections' => $selecciones,
             'quot' => $decim_tot
+        ], 200);
+    }
+
+    public function selectHipism(Request $request) {
+        $user = Auth::user();
+        $player = $user->player;
+        $data = $request->all();
+        
+        $selecciones = [];
+        $tipo = '';
+        
+        $exists = Selection::whereSelectId($data['bet_id'])
+        ->where('player_id', $player->id)
+        ->where(function ($query) {
+            $query->where('ticket_id', '0')
+                  ->orWhere('ticket_id', '')
+                  ->orWhere('ticket_id', null);
+        })
+        ->first();
+
+        if ($exists) {
+            $exists->delete();
+            $status= "success"; 
+            $mstatus = "Jugada eliminada";
+        } else {
+            $exists1 = Selection::where('player_id', $player->id)
+            ->where(function ($query) {
+                $query->where('ticket_id', '0')
+                      ->orWhere('ticket_id', '')
+                      ->orWhere('ticket_id', null);
+            })
+            ->first();
+
+            if (isset($exists1) && $exists1->category_id != '7') {
+                $mstatus = "No se pueden combinar selecciones de deporte e hipismo";
+                $status = 'warning';
+                $selecciones = [];
+                $tipo = 'x';
+            } else {
+                $inscription = Inscription::whereId($data['bet_id'])->first();
+
+                if ($inscription) {
+                    $career_id = $inscription["career_id"];
+
+                    $exists2 = Selection::whereSample($career_id)
+                    ->where('player_id', $player->id)
+                    ->where(function ($query) {
+                        $query->where('ticket_id', '0')
+                              ->orWhere('ticket_id', '')
+                              ->orWhere('ticket_id', null);
+                    })
+                    ->get();
+
+                    if (count($exists2) > 0) {
+                        $status = "info";
+                        $mstatus = "Ya tiene una jugada seleccionada para esta carrera";
+                    } else {
+                        $selection = new Selection;
+                        $selection->select_id = $data['bet_id'];
+                        $selection->sample = $career_id;
+                        $selection->type = '7';
+                        $selection->value = '1';
+                        $selection->category_id = '7';  
+                        $selection->ticket_id = null;                        
+
+                        $player->selections()->save($selection);
+
+                        $status = "success";
+                        $mstatus = "Jugada seleccionada";
+                    } 
+                }                
+            }                          
+        }
+
+        if ($tipo != 'x') {
+            $selections = Selection::where('player_id', $player->id)
+            ->where(function ($query) {
+                $query->where('ticket_id', '0')
+                      ->orWhere('ticket_id', '')
+                      ->orWhere('ticket_id', null);
+            })
+            ->with('career')
+            ->get();
+
+            $i = 0;
+
+            foreach ($selections as $sel) {
+                if ($sel->career->date <= date("Y-m-d H:i:s")) {
+                    $sel->delete();
+                } else {
+                    $oins = Inscription::whereId($sel->select_id)->first();
+
+                    $selecciones[$i]['id'] = $sel->id;
+                    $selecciones[$i]['numero'] = $oins->number;
+                    $selecciones[$i]['horse'] = $oins->horse->name;
+                    $selecciones[$i]['carrera'] = $sel->career->number;
+                    $selecciones[$i]['hipodromo'] = $sel->career->racecourse->name;
+                    $selecciones[$i]['fecha_hora'] = $sel->career->date;
+                }
+                $i++; 
+            }            
+        }
+
+        return $this->successResponse([
+            "status" => $status,
+            "mstatus" => $mstatus,
+            'selections' => $selecciones
         ], 200);
     }
 

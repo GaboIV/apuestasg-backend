@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Competitor;
 use App\Http\Controllers\ApiController;
+use App\Inscription;
 use App\League;
 use App\Selection;
 use App\Team;
@@ -26,6 +27,15 @@ class TicketController extends ApiController
         $player = $user->player;
 
         $ticketes = $player->tickets;
+
+        foreach ($ticketes as $tik) {
+        	foreach ($tik['selections'] as $sel) {
+        		if ($sel->category_id == 7) {
+	        		$sel->inscription;
+	        		$sel->career;
+	        	}
+        	}       	
+        }
 
         return $this->successResponse($ticketes, 200);
 	}
@@ -160,6 +170,116 @@ class TicketController extends ApiController
 		            "ticketes" => null,
 		            "mstatus" => "No posee selecciones para generar un ticket"
 		        ];
+       		}            
+       	} else {
+       		$response = [
+	            "status" => "error",
+	            "ticketes" => null,
+	            "mstatus" => "No tiene saldo suficiente para hacer esta apuesta"
+	        ];
+       	}
+
+       	return $this->successResponse($response, 200);
+    }
+
+    public function addHipism(Request $request) {
+        $user = Auth::user();
+        $player = $user->player;
+        $data = $request->all();
+        $i = 0;
+	    $j = 0;
+	    $m = 1;
+	    $fecha = date("Y-m-d H:i:s");   
+
+	    $monto = explode("#", $data['montos']);
+
+       	if ($player->available >= $monto[$m]) {
+       		$selections = Selection::where('player_id', $player->id)
+            ->where(function ($query) {
+                $query->where('ticket_id', '0')
+                      ->orWhere('ticket_id', '')
+                      ->orWhere('ticket_id', null);
+            })
+            ->with('career')
+            ->get();
+
+       		if (count($selections) >= 1) {
+       			foreach ($selections as $sel) {
+       				$cod_serial = substr(md5(rand()),0,10);
+                    $selecciones[] = $sel;
+
+                    if ($player->available >= $monto[$m]) {
+                    	$inscription = Inscription::whereId($sel->select_id)->first();
+
+                    	if ($inscription) {
+                    		$ticketes[$i]['selecciones']['inscripcion'] = $inscription; 
+                    		$ticketes[$i]['selecciones']['inscripcion']['carrera'] = $sel['career'];
+                    		$ticketes[$i]['selecciones']['inscripcion']['hipodromo'] = $sel['career']['racecourse'];
+
+                            $k = 0;
+                    	}
+
+                    	if ($monto[$m] != '' OR $monto[$m] > 0) {
+                    		$monto_a = floatval($monto[$m]);
+
+                    		$ticket_id = DB::table('tickets')->insertGetId(
+							    [
+							    	'code' => $cod_serial, 
+							    	'player_id' => $player->id,
+							    	'amount' => $monto_a,
+							    	'towin' => 0,
+							    	'status' => 0,
+							    	'created_at' => date('Y-m-d H:i:s'),
+							    	'updated_at' => date('Y-m-d H:i:s')
+							    ]
+							);
+
+							if ($ticket_id != 0) {
+						    	$sel->update([				    	
+							    	'player_id' => $player->id,
+							    	'ticket_id' => $ticket_id
+							    ]);							    
+			                }
+
+			                if ($ticket_id) {
+								$ticketes[0]['id_usuario'] = $player->id;
+								$ticketes[0]['cod_seguridad'] = $cod_serial;
+								$ticketes[0]['fecha_hora'] = $fecha;
+								$ticketes[0]['monto'] = $monto_a;
+								$ticketes[0]['a_ganar'] = 'Según dividendo';
+								$ticketes[0]['id_seleccion'] = $sel['select_id'];
+
+								$nuevo_d = $player->available - $monto_a;
+
+								$transaction = Transaction::create([
+									"event_type_id" => 1,
+									"player_id" => $player->id,
+									"ticket_id" => $cod_serial,
+									"amount" => $monto_a,
+									"player_balance" => $nuevo_d
+								]);
+
+								$player->available = $nuevo_d;
+
+								if ($player->update()) {
+									$disponible = $nuevo_d;
+			                        
+								}               
+							}
+                    	}
+
+                    	$i++; $m++;
+                    } else {
+                    	break;
+                    }		        
+	            }
+	            $response = array(
+                    "status" => "success",
+                    "ticketes" => $ticketes,
+                    "disponible" => $disponible ?? 0,
+                    "montos" => $monto,
+                    "mstatus" => "Ticket generado correctamente"
+                );
        		}            
        	} else {
        		$response = [

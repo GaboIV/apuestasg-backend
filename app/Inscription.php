@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 class Inscription extends Model {
-    protected $with = ["stud", "horse"];
+    protected $with = ["stud", "horse", "jockey", "trainer"];
 
     public function stud() {
         return $this->hasOne(Stud::class, 'id', 'stud_id');

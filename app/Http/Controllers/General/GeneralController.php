@@ -4,6 +4,7 @@ namespace App\Http\Controllers\General;
 
 use App\Account;
 use App\Bank;
+use App\Career;
 use App\Category;
 use App\Game;
 use App\Http\Controllers\ApiController;
@@ -35,13 +36,19 @@ class GeneralController extends ApiController {
         $fecha_manana = date_format($fecha_manana, 'Y-m-d H:i:s');
 
         for ($i=0; $i < count($category); $i++) { 
-            $juegos = 0;
-            $juegos = Game::where('games.start', '>=', date("Y-m-d H:i"))
-            ->where('games.start', '<=', $fecha_manana)
-            ->where('leagues.category_id', $category[$i]['id'])
-            ->join('leagues', 'games.league_id', '=', 'leagues.id')
-            ->select('games.*')
-            ->count();
+            if ($category[$i]['id'] == 7) {
+                $juegos = 0;
+                $juegos = Career::where('careers.date', '>=', date("Y-m-d H:i"))
+                ->count();
+            } else {
+                $juegos = 0;
+                $juegos = Game::where('games.start', '>=', date("Y-m-d H:i"))
+                ->where('games.start', '<=', $fecha_manana)
+                ->where('leagues.category_id', $category[$i]['id'])
+                ->join('leagues', 'games.league_id', '=', 'leagues.id')
+                ->select('games.*')
+                ->count();
+            }            
 
             $category[$i]['juegos'] = $juegos;
         }
@@ -201,6 +208,54 @@ class GeneralController extends ApiController {
 
         return $this->successResponse([
             'banks' => $banks
+        ], 200);
+    }
+
+    public function getCareers($id) {
+        $i = 0;
+        $indice = '';
+        $indice2 = '';
+        $carreras = [];
+        $fecha_for_1 = date("Y-m-d H:i:s");
+        $fecha = [];
+
+        $query = Career::orderBy('racecourse_id', 'Desc');
+
+        $query->where('date', '>=', $fecha_for_1);
+
+        if ($id != 'todas') {
+            $query->whereId($data['id']);
+        }
+
+        if (isset(request()->inscriptions) && request()->inscriptions == 1) {
+            $query->with('inscriptions');
+            $careers = $query->get()
+                             ->map->append('inscripcion');
+        } else {
+            $careers = $query->get();
+        }
+
+        foreach ($careers as $car) {   
+            $carreras[] = $car;       
+            if ($car->racecourse->id != $indice OR $car->date != $indice2) {
+                $indice = $car->racecourse->id;
+                $indice2 = $car->date;
+
+                $carreras[$i]['div'] = $car->racecourse->name." > ".$car->date;
+
+                $fecha[] = array(
+                    'dia' => $car->dia,
+                    'hip' => $car->racecourse->name
+                 );
+            }
+            $i++;
+        }
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'carreras' => $carreras,
+            'dias' => $fecha,
+            'time' => date("Y-m-d H:i:s"),
         ], 200);
     }
 }
