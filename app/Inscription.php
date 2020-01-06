@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Inscription extends Model {
     protected $with = ["stud", "horse", "jockey", "trainer"];
 
+    protected $fillable = [
+        'status',
+        'odd'
+    ];
+
     public function stud() {
         return $this->hasOne(Stud::class, 'id', 'stud_id');
     }

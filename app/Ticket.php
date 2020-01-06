@@ -9,7 +9,8 @@ class Ticket extends Model {
 	protected $appends = ['quot'];
 
 	protected $fillable = [
-        'status'
+        'status',
+        'towin'
     ];
 
     public function player() {

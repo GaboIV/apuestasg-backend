@@ -11,6 +11,11 @@ class Career extends Model {
 
 	protected $with = ["racecourse"];
 
+    protected $fillable = [
+        'date',
+        'status'
+    ];
+
     public function racecourse() {
         return $this->hasOne(Racecourse::class, 'id', 'racecourse_id');
     }

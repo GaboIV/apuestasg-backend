@@ -8,9 +8,10 @@ use App\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Player extends Model
-{
+class Player extends Model {
     use Notifiable;
+
+    protected $appends = ['risk', 'total'];
 
     const FEMENINO = 'F';
     const MASCULINO = 'M';
@@ -75,5 +76,15 @@ class Player extends Model
     public function transactions() {
         return $this->hasMany(Transaction::class)
         ->orderBy('created_at', 'desc');
+    }
+
+    public function getRiskAttribute() { 
+        return Ticket::wherePlayerId($this->id)
+        ->whereStatus(0)
+        ->sum('amount');
+    }
+
+    public function getTotalAttribute() { 
+        return $this->risk + $this->available;
     }
 }
