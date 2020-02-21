@@ -13,6 +13,7 @@
         "fideloper/proxy": "^4.0",
         "laravel/framework": "^6.0",
         "laravel/passport": "^7.5",
+        "laravel/telescope": "^3.0",
         "laravel/tinker": "^1.0",
         "laraveles/spanish": "^1.3"
     },
