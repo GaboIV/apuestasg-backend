@@ -11,6 +11,8 @@ use App\Racecourse;
 use App\Stud;
 use App\Trainer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class HorseController extends ApiController {
     public function getHorses() {
@@ -276,6 +278,14 @@ class HorseController extends ApiController {
             }                    
         })
         ->paginate('50');
+
+        foreach ($studs as $stud) {
+            $file = storage_path("app/studs/" . $stud->id . ".png");
+
+            if(file_exists(storage_path("app/studs/" . $stud->id . ".png"))) {
+                File::copy(storage_path("app/studs/" . $stud->id . ".png"), storage_path("app/studs_name/" . $stud->name . ".png"));
+            }
+        }
 
         return $this->successResponse([
             'status' => 'correcto',

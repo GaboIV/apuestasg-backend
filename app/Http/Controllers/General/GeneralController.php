@@ -237,7 +237,7 @@ class GeneralController extends ApiController {
 
         foreach ($careers as $car) {   
             $carreras[] = $car;       
-            if ($car->racecourse->id != $indice OR $car->date != $indice2) {
+            if ($car->racecourse->id != $indice OR ((new \DateTime($car->date))->diff(new \DateTime($indice2))->days > 0)) {
                 $indice = $car->racecourse->id;
                 $indice2 = $car->date;
 
