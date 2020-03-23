@@ -1,30 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
-// Obtener hora
-Route::get('/hora', 'General\GeneralController@hora');
 
-//Número de juegos por categoría
-Route::get('/showgamesbycategory', 'General\GeneralController@showGamesByCategory');
-
-// Ver juegos por categoría
-Route::get('/showgames/{id}', 'General\GeneralController@GamesByCategory');
-
-// Ver juegos destacados
-Route::get('/showgamesoutstanding', 'General\GeneralController@GamesOutstanding');
-
-// Ver equipos por búsqueda de nombre
-Route::post('games/byName', 'General\GeneralController@GamesBySearch');
-
-// Ver cuentas de banco disponibles
-Route::get('accounts', 'General\GeneralController@getAccounts');
-
-// Ver cuentas de banco disponibles
-Route::get('banks', 'General\GeneralController@getBanks');
-
-// Subida de imágenes
-Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
 
 Route::group(['prefix' => 'auth'], function () {
     // Login de jugador y administrador
@@ -34,51 +12,115 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', 'Auth\RegisterController@createPlayer');
 });
 
-// Carreras
-Route::group(['prefix' => 'careers'], function () {
-    Route::get('/{id}', 'General\GeneralController@getCareers');
+Route::group(['prefix' => 'public'], function () {
+    // Obtener hora
+    Route::get('/hora', 'General\GeneralController@hora');
+
+    //Número de juegos por categoría
+    Route::get('/showgamesbycategory', 'General\GeneralController@showGamesByCategory');
+
+    // Ver juegos por categoría
+    Route::get('/showgames/{id}', 'General\GeneralController@GamesByCategory');
+
+    // Ver juegos destacados
+    Route::get('/showgamesoutstanding', 'General\GeneralController@GamesOutstanding');
+
+    // Ver equipos por búsqueda de nombre
+    Route::post('games/byName', 'General\GeneralController@GamesBySearch');
+
+    // Ver cuentas de banco disponibles
+    Route::get('accounts', 'General\GeneralController@getAccounts');
+
+    // Ver cuentas de banco disponibles
+    Route::get('banks', 'General\GeneralController@getBanks');
+
+    // Carreras
+    Route::group(['prefix' => 'careers'], function () {
+        Route::get('/{id}', 'General\GeneralController@getCareers');
+    });
 });
+
+
+
+
+
+
+
+
+
+
+
+// Subida de imágenes
+Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
+
+
+
+
 
 
 Route::group(['middleware' => 'auth:api'], function () {
 	// Cerrar sesión
-	Route::get('auth/logout', 'Auth\LoginController@logout');
+    Route::get('auth/logout', 'Auth\LoginController@logout');
+    
+    // Rutas de Administrador
+    Route::group(['prefix' => 'admin'], function () {
+        // Chagelog
+        Route::get('changelogs', 'Admin\AdminController@getChangelog');
+        
+        // Ligas
+        Route::post('leagues/category/country', 'Api\LeagueController@byCategory');
+        Route::resource('leagues', 'Api\LeagueController')->except([
+            'create', 'edit'
+        ]);
+        Route::get('updates', 'Admin\AdminController@loadUpdatesLeagues');	
 
-	// Chagelog
-	Route::get('changelogs', 'Admin\AdminController@getChangelog');
+        // Partidos
+        Route::put('games/updateOutstanding/{id}', 'Api\GameController@updateOutstanding');
+        Route::post('games/byFilters', 'Api\GameController@byFilters');
+        Route::get('games/{id}', 'Api\GameController@one');
+        Route::resource('games', 'Api\GameController')->except([
+            'create', 'edit'
+        ]);
 
-	// Ligas
-	Route::post('leagues/category/country', 'Api\LeagueController@byCategory');
-    Route::resource('leagues', 'Api\LeagueController')->except([
-	    'create', 'edit'
-	]);
-	Route::get('updates', 'Admin\AdminController@loadUpdatesLeagues');	
+        // Resultados
+        Route::post('results/gamesByFilters', 'Api\ResultController@byFilters');
+        Route::post('results/careersByFilters', 'Api\ResultController@byHipismFilters');
+        Route::post('results', 'Api\ResultController@resultCharge');
+        Route::post('resultshipism', 'Api\ResultController@resultHipismCharge');
 
-    // Partidos
-	Route::put('games/updateOutstanding/{id}', 'Api\GameController@updateOutstanding');
-	Route::post('games/byFilters', 'Api\GameController@byFilters');
-	Route::get('games/{id}', 'Api\GameController@one');
-	Route::resource('games', 'Api\GameController')->except([
-	    'create', 'edit'
-	]);
+        // Equipos
+        Route::get('teams/byleague/{id}', 'Api\TeamController@byLeague');
+        Route::resource('teams', 'Api\TeamController')->except([
+            'create', 'edit'
+        ]);
 
-	// Resultados
-	Route::post('results/gamesByFilters', 'Api\ResultController@byFilters');
-    Route::post('results/careersByFilters', 'Api\ResultController@byHipismFilters');
-	Route::post('results', 'Api\ResultController@resultCharge');
-    Route::post('resultshipism', 'Api\ResultController@resultHipismCharge');
+        // Categorías
+        Route::get('categories', 'Admin\AdminController@loadCategories');
 
-	// Equipos
-	Route::get('teams/byleague/{id}', 'Api\TeamController@byLeague');
-	Route::resource('teams', 'Api\TeamController')->except([
-	    'create', 'edit'
-	]);
+        //Paises
+        Route::get('countries', 'Admin\AdminController@loadCountries');
 
-	// Categorías
-	Route::get('categories', 'Admin\AdminController@loadCategories');
+        // Studs
+        Route::resource('studs', 'Admin\Horses\StudController')->except([
+            'create', 'edit'
+        ]);
 
-	//Paises
-	Route::get('countries', 'Admin\AdminController@loadCountries');
+        // Caballos
+        Route::group(['prefix' => 'horses'], function () {
+            Route::get('', 'Api\HorseController@getHorses');
+            Route::put('/{id}', 'Api\HorseController@update');
+
+            Route::get('/madrillasui', 'Api\HorseController@getMadrillasUi');
+            Route::post('/madrillas', 'Api\HorseController@addMadrilla');
+
+            Route::get('/padrillosui', 'Api\HorseController@getPadrillosUi');
+            Route::post('/padrillos', 'Api\HorseController@addPadrillo');
+
+            Route::get('/haras', 'Api\HorseController@getHaras');
+
+            
+        });
+    });	
 
 	// Jugadores
 	Route::group(['prefix' => 'player'], function () {
@@ -96,38 +138,4 @@ Route::group(['middleware' => 'auth:api'], function () {
 		Route::post('/pays', 'Api\PlayerController@registerPay');
 		Route::get('/pays', 'Api\PlayerController@getPays');
 	});
-	
-	// Caballos
-	Route::group(['prefix' => 'horses'], function () {
-        Route::get('', 'Api\HorseController@getHorses');
-        Route::put('/{id}', 'Api\HorseController@update');
-
-        Route::get('/madrillasui', 'Api\HorseController@getMadrillasUi');
-        Route::post('/madrillas', 'Api\HorseController@addMadrilla');
-
-        Route::get('/padrillosui', 'Api\HorseController@getPadrillosUi');
-        Route::post('/padrillos', 'Api\HorseController@addPadrillo');
-
-        Route::get('/haras', 'Api\HorseController@getHaras');
-    });
-
-	// Jinetes
-    Route::group(['prefix' => 'jockeys'], function () {
-        Route::get('', 'Api\HorseController@getJockeys');
-    });
-
-    // Entrenadores
-    Route::group(['prefix' => 'trainers'], function () {
-        Route::get('', 'Api\HorseController@getTrainers');
-    });
-
-    // Studs
-    Route::group(['prefix' => 'studs'], function () {
-        Route::get('', 'Api\HorseController@getStuds');
-    });
-
-    // Studs
-    Route::group(['prefix' => 'racecourses'], function () {
-        Route::get('', 'Api\HorseController@getRacecourses');
-    });
 });
