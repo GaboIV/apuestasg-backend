@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin\Horses;
 use App\Haras;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 
-class HarasController extends Controller {
+class HarasController extends ApiController {
     public function index() {
         $haras = Haras::orderBy('name', 'asc')
                     ->get();

@@ -116,9 +116,13 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('/padrillosui', 'Api\HorseController@getPadrillosUi');
             Route::post('/padrillos', 'Api\HorseController@addPadrillo');
 
-            Route::get('/haras', 'Api\HorseController@getHaras');
-
+            Route::resource('haras', 'Admin\Horses\HarasController')->except([
+                'create', 'edit'
+            ]);
             
+            Route::resource('horses/jockeys', 'Admin\Horses\JockeyController')->except([
+                'create', 'edit'
+            ]);
         });
     });	
 
