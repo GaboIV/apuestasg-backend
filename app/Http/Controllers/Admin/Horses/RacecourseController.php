@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin\Horses;
 use App\Racecourse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 
-class RacecourseController extends Controller{
+class RacecourseController extends ApiController{
     public function index() {
         $racecourses = Racecourse::orderBy('name', 'asc')
                     ->get();

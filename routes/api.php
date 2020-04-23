@@ -120,7 +120,15 @@ Route::group(['middleware' => 'auth:api'], function () {
                 'create', 'edit'
             ]);
             
-            Route::resource('horses/jockeys', 'Admin\Horses\JockeyController')->except([
+            Route::resource('jockeys', 'Admin\Horses\JockeyController')->except([
+                'create', 'edit'
+            ]);
+
+            Route::resource('trainers', 'Admin\Horses\TrainerController')->except([
+                'create', 'edit'
+            ]);
+
+            Route::resource('racecourses', 'Admin\Horses\RacecourseController')->except([
                 'create', 'edit'
             ]);
         });

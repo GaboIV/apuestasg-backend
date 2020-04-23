@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin\Horses;
 use App\Jockey;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 
-class JockeyController extends Controller {
+class JockeyController extends ApiController {
     public function index() {
         $criterios = explode(" ", request()->criterio);
 

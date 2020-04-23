@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin\Horses;
 use App\Trainer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 
-class TrainerController extends Controller {
+class TrainerController extends ApiController {
     public function index() {
         $criterios = explode(" ", request()->criterio);
 
