@@ -38,7 +38,7 @@ class GeneralController extends ApiController {
         for ($i=0; $i < count($category); $i++) { 
             if ($category[$i]['id'] == 7) {
                 $juegos = 0;
-                $juegos = Career::where('careers.date', '>=', date("Y-m-d H:i"))
+                $juegos = Career::where('date', '>=', date("Y-m-d H:i"))
                 ->count();
             } else {
                 $juegos = 0;

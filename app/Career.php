@@ -13,7 +13,11 @@ class Career extends Model {
 
     protected $fillable = [
         'date',
-        'status'
+        'status',
+        'code',
+        'number',
+        'title',
+        'racecourse_id'
     ];
 
     public function racecourse() {

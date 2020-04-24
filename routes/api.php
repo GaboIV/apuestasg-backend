@@ -131,6 +131,11 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::resource('racecourses', 'Admin\Horses\RacecourseController')->except([
                 'create', 'edit'
             ]);
+
+            Route::post('/careers/sync', 'Admin\Horses\CareerController@sync');
+            Route::resource('careers', 'Admin\Horses\CareerController')->except([
+                'create', 'edit'
+            ]);
         });
     });	
 

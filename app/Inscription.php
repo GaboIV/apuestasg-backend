@@ -9,6 +9,12 @@ class Inscription extends Model {
 
     protected $fillable = [
         'status',
+        'horse_id',
+        'jockey_id',
+        'career_id',
+        'trainer_id',
+        'number',
+        'position',
         'odd'
     ];
 
