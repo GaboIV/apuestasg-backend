@@ -12,12 +12,22 @@ class Career extends Model {
 	protected $with = ["racecourse"];
 
     protected $fillable = [
-        'date',
-        'status',
         'code',
-        'number',
+        'name',
         'title',
-        'racecourse_id'
+        'racecourse_id',
+        'date',
+        'time',
+        'distance',
+        'number',
+        'valid',
+        'surface',
+        'status',
+        'grade',
+        'purse',
+        'age_restriction',
+        'sex_restriction',
+        'record'
     ];
 
     public function racecourse() {
@@ -51,6 +61,6 @@ class Career extends Model {
     }
 
     public function inscriptions() {
-        return $this->hasMany('App\Inscription');
+        return $this->hasMany('App\Inscription')->orderBy('number');
     }
 }

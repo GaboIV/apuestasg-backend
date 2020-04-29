@@ -14,6 +14,9 @@ class Inscription extends Model {
         'career_id',
         'trainer_id',
         'number',
+        'weight',
+        'medicines',
+        'implements',
         'position',
         'odd'
     ];

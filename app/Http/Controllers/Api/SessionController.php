@@ -28,7 +28,7 @@ class SessionController extends ApiController {
             if ($sel->category_id == 7) {
                 $tipo = "7";
 
-                if ($sel->career->date <= date("Y-m-d H:i:s")) {
+                if (($sel->career->date . " " . $sel->career->time) <= date("Y-m-d H:i:s")) {
                     $sel->delete();
                 } else {
                     $oins = Inscription::whereId($sel->select_id)->first();
@@ -38,7 +38,7 @@ class SessionController extends ApiController {
                     $selecciones[$i]['horse'] = $oins->horse->name;
                     $selecciones[$i]['carrera'] = $sel->career->number;
                     $selecciones[$i]['hipodromo'] = $sel->career->racecourse->name;
-                    $selecciones[$i]['fecha_hora'] = $sel->career->date;
+                    $selecciones[$i]['fecha_hora'] = $sel->career->date . " " . $sel->career->time;
                 }
                 $i++; 
             } else {
@@ -297,7 +297,7 @@ class SessionController extends ApiController {
             $i = 0;
 
             foreach ($selections as $sel) {
-                if ($sel->career->date <= date("Y-m-d H:i:s")) {
+                if (($sel->career->date . " " . $sel->career->time) <= date("Y-m-d H:i:s")) {
                     $sel->delete();
                 } else {
                     $oins = Inscription::whereId($sel->select_id)->first();
@@ -307,7 +307,7 @@ class SessionController extends ApiController {
                     $selecciones[$i]['horse'] = $oins->horse->name;
                     $selecciones[$i]['carrera'] = $sel->career->number;
                     $selecciones[$i]['hipodromo'] = $sel->career->racecourse->name;
-                    $selecciones[$i]['fecha_hora'] = $sel->career->date;
+                    $selecciones[$i]['fecha_hora'] = $sel->career->date . " " . $sel->career->time;
                 }
                 $i++; 
             }            

@@ -38,8 +38,7 @@ class GeneralController extends ApiController {
         for ($i=0; $i < count($category); $i++) { 
             if ($category[$i]['id'] == 7) {
                 $juegos = 0;
-                $juegos = Career::where('date', '>=', date("Y-m-d H:i"))
-                ->count();
+                $juegos = Career::where('date', '>=', date("Y-m-d"))->where('time', '>=', date('H:i'))->count();
             } else {
                 $juegos = 0;
                 $juegos = Game::where('games.start', '>=', date("Y-m-d H:i"))
@@ -221,7 +220,7 @@ class GeneralController extends ApiController {
 
         $query = Career::orderBy('racecourse_id', 'Desc');
 
-        $query->where('date', '>=', $fecha_for_1);
+        $query->where('date', '>=', date("Y-m-d"))->where('time', '>=', date('H:i'));
 
         if ($id != 'todas') {
             $query->whereId($data['id']);
@@ -237,7 +236,7 @@ class GeneralController extends ApiController {
 
         foreach ($careers as $car) {   
             $carreras[] = $car;       
-            if ($car->racecourse->id != $indice OR ((new \DateTime($car->date))->diff(new \DateTime($indice2))->days > 0)) {
+            if ($car->racecourse->id != $indice OR ((new \DateTime($car->date . " " . $car->time))->diff(new \DateTime($indice2))->days > 0)) {
                 $indice = $car->racecourse->id;
                 $indice2 = $car->date;
 

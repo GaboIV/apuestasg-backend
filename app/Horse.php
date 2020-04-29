@@ -26,6 +26,7 @@ class Horse extends Model
     protected $fillable = [
         'name',
         'code',
+        'color',
         'sex',
         'birthday',
         'father_id',
@@ -56,13 +57,14 @@ class Horse extends Model
 
             if ($interval->format('%m') == "0") {
                 $descripcion2 = "exactos";
-            } elseif ($interval->format('%m') == "1") {
-                $descripcion2 = "y ".$interval->format('%m mes');
-            } else {
-                $descripcion2 = "y ".$interval->format('%m meses');
-            }    
+            }
+            // } elseif ($interval->format('%m') == "1") {
+            //     $descripcion2 = "y ".$interval->format('%m mes');
+            // } else {
+            //     $descripcion2 = "y ".$interval->format('%m meses');
+            // }    
 
-            return $descripcion." ".$descripcion2;
+            return $descripcion." ". ($descripcion2 ?? '');
         } else {
             return "S/I edad";
         }

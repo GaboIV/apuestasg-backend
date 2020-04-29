@@ -170,7 +170,7 @@ class CareerController extends Controller
                     'trainer_id' => $trainer->id,
                     'position' => $ins['postPosition'],
                     'odd' => $ins['morningLineOdds']
-                ],
+                ]
             );
         }        
     }
