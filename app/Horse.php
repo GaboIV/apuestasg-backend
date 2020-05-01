@@ -29,6 +29,7 @@ class Horse extends Model
         'color',
         'sex',
         'birthday',
+        'jacket_url',
         'father_id',
         'mother_id',
         'haras_id'

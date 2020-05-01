@@ -42,6 +42,8 @@ class RacecourseController extends ApiController{
     }
 
     public function syncCareers ($id) {
+        ini_set('max_execution_time', 300);
+
         $racecourse = Racecourse::find($id);
 
         if (isset($racecourse->url)) {
@@ -51,8 +53,7 @@ class RacecourseController extends ApiController{
                 'Content' => 'application/json'
             ]]);
 
-            $tracks = json_decode($client->request('GET', $racecourse->url)->getBody());
-        
+            $tracks = json_decode($client->request('GET', $racecourse->url)->getBody());        
 
             foreach ($tracks->AllRaces as $trk) {
 
@@ -60,6 +61,8 @@ class RacecourseController extends ApiController{
 
                 if ($trk->DistanceUnit == "F") {
                     $distance = ($trk->Distance / 100) * 201;
+                } elseif ($trk->DistanceUnit == "Y") {
+                    $distance = ($trk->Distance / 1.094);
                 }
 
                 if ($trk->Surface == "T") {
@@ -78,7 +81,7 @@ class RacecourseController extends ApiController{
                     "title" => $trk->RaceConditions,
                     "time" => date("H:i:s", strtotime($trk->PostTime)),
                     "distance" => $distance,
-                    "surface" => $surface,
+                    "surface" => $surface ?? null,
                     "status" => 1,
                     "grade" => $trk->Grade,
                     "purse" => $trk->Purse,
@@ -105,7 +108,7 @@ class RacecourseController extends ApiController{
 
                     if ($ins->SexDescription == 'Horse' || $ins->SexDescription == 'Gelding' || $ins->SexDescription == 'Colt') {
                         $sexHorse = "M";
-                    } elseif ($ins->SexDescription == 'Mare' || $ins->SexDescription == 'Filly') {
+                    } elseif ($ins->SexDescription == 'Mare' || $ins->SexDescription == 'Filly' || $ins->SexDescription == 'Female') {
                         $sexHorse = "M";
                     }
                     

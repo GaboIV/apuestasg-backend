@@ -107,6 +107,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         // Caballos
         Route::group(['prefix' => 'horses'], function () {
+            Route::patch('horses/jacket_url/{id}', 'Admin\Horses\HorseController@changeJacketUrl');
             Route::get('', 'Api\HorseController@getHorses');
             Route::put('/{id}', 'Api\HorseController@update');
 
@@ -135,6 +136,10 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('/careers/sync', 'Admin\Horses\CareerController@sync');
             Route::resource('careers', 'Admin\Horses\CareerController')->except([
+                'create', 'edit'
+            ]);
+
+            Route::resource('horses', 'Admin\Horses\HorseController')->except([
                 'create', 'edit'
             ]);
         });
