@@ -38,7 +38,7 @@ class GeneralController extends ApiController {
         for ($i=0; $i < count($category); $i++) { 
             if ($category[$i]['id'] == 7) {
                 $juegos = 0;
-                $juegos = Career::where('date', '>=', date("Y-m-d"))->where('time', '>=', date('H:i'))->count();
+                $juegos = Career::where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $daynow)->count();
             } else {
                 $juegos = 0;
                 $juegos = Game::where('games.start', '>=', date("Y-m-d H:i"))
@@ -220,7 +220,7 @@ class GeneralController extends ApiController {
 
         $query = Career::orderBy('racecourse_id', 'Desc');
 
-        $query->where('date', '>=', date("Y-m-d"))->where('time', '>=', date('H:i'));
+        $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
 
         if ($id != 'todas') {
             $query->whereId($data['id']);

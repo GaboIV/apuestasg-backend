@@ -115,7 +115,7 @@ class CareerController extends Controller
 
         $career = Career::firstOrCreate([
             "number" => $career_data['number'],
-            "date" => date_format($postdate, 'Y-m-d H:i:s')
+            "posttime" => date_format($postdate, 'Y-m-d H:i:s')
         ],
         [
             "code" => "GF20488",

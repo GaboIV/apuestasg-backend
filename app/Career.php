@@ -17,7 +17,7 @@ class Career extends Model {
         'title',
         'racecourse_id',
         'date',
-        'time',
+        'posttime',
         'distance',
         'number',
         'valid',

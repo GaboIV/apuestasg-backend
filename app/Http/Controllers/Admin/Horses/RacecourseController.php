@@ -42,7 +42,7 @@ class RacecourseController extends ApiController{
     }
 
     public function syncCareers ($id) {
-        ini_set('max_execution_time', 300);
+        ini_set('max_execution_time', 600);
 
         $racecourse = Racecourse::find($id);
 
@@ -79,7 +79,7 @@ class RacecourseController extends ApiController{
                 [
                     "name" => $trk->RaceName,
                     "title" => $trk->RaceConditions,
-                    "time" => date("H:i:s", strtotime($trk->PostTime)),
+                    "posttime" => date("Y-m-d H:i:s", strtotime($trk->PostTime)),
                     "distance" => $distance,
                     "surface" => $surface ?? null,
                     "status" => 1,
