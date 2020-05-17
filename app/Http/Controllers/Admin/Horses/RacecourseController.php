@@ -63,6 +63,8 @@ class RacecourseController extends ApiController{
                     $distance = ($trk->Distance / 100) * 201;
                 } elseif ($trk->DistanceUnit == "Y") {
                     $distance = ($trk->Distance / 1.094);
+                } elseif ($trk->DistanceUnit == "M") {
+                    $distance = $trk->Distance;
                 }
 
                 if ($trk->Surface == "T") {

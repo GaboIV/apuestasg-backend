@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\General;
 
-use App\Account;
 use App\Bank;
-use App\Career;
-use App\Category;
 use App\Game;
-use App\Http\Controllers\ApiController;
-use App\Http\Controllers\Controller;
+use App\Career;
 use App\League;
+use App\Account;
+use App\Category;
+use App\Racecourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\Eloquent\Builder;
+use App\Http\Resources\RacecourseResource;
 use Symfony\Component\Console\Input\Input;
 
 class GeneralController extends ApiController {
@@ -218,6 +221,63 @@ class GeneralController extends ApiController {
         $fecha_for_1 = date("Y-m-d H:i:s");
         $fecha = [];
 
+        $query = Career::orderBy('racecourse_id', 'Desc');
+
+        $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
+
+        $query->with('inscriptions');
+
+        if ($id != 'todas') {
+            $query->whereRacecourseId($id);
+        }
+        
+        $careers = $query->get();        
+
+        foreach ($careers as $car) {   
+            $carreras[] = $car;       
+            if ($car->racecourse->id != $indice OR ((new \DateTime($car->date . " " . $car->time))->diff(new \DateTime($indice2))->days > 0)) {
+                $indice = $car->racecourse->id;
+                $indice2 = $car->date;
+
+                $carreras[$i]['div'] = $car->racecourse->name." > ".$car->date;
+
+                $fecha[] = array(
+                    'dia' => $car->dia,
+                    'hip' => $car->racecourse->id
+                 );
+            }
+            $i++;
+        }
+
+        return $this->successResponse([
+            'status' => 'correcto',
+            'carreras' => $carreras,
+            'dias' => $fecha,
+            'time' => date("Y-m-d H:i:s"),
+        ], 200);
+    }
+
+    public function getRacecourses() {
+        $i = 0;
+        $indice = '';
+        $indice2 = '';
+        $carreras = [];
+        $fecha_for_1 = date("Y-m-d H:i:s");
+        $fecha = [];
+
+        $query = Racecourse::whereHas('careers', function (Builder $query) use ($fecha_for_1) {
+            $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
+        })
+        ->withCount([
+            'careers' => function ($query) use ($fecha_for_1) {
+                $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
+        }])
+        ->get();
+
+        // return $query;
+
+        return RacecourseResource::collection($query);
+        
         $query = Career::orderBy('racecourse_id', 'Desc');
 
         $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);

@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-
+// Subida de imágenes
+Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
 
 Route::group(['prefix' => 'auth'], function () {
     // Login de jugador y administrador
@@ -35,28 +36,15 @@ Route::group(['prefix' => 'public'], function () {
     Route::get('banks', 'General\GeneralController@getBanks');
 
     // Carreras
+    Route::group(['prefix' => 'racecourses'], function () {
+        Route::get('', 'General\GeneralController@getRacecourses');
+    });
+
+    // Carreras
     Route::group(['prefix' => 'careers'], function () {
         Route::get('/{id}', 'General\GeneralController@getCareers');
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-// Subida de imágenes
-Route::post('images', 'General\GeneralController@imageUploadPost')->name('image.upload.post');
-
-
-
-
-
 
 Route::group(['middleware' => 'auth:api'], function () {
 	// Cerrar sesión
@@ -102,6 +90,16 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         // Studs
         Route::resource('studs', 'Admin\Horses\StudController')->except([
+            'create', 'edit'
+        ]);
+
+        // Players
+        Route::resource('players', 'Admin\PlayerController')->except([
+            'create', 'edit'
+        ]);
+
+        // Usuarios internos
+        Route::resource('users', 'Admin\UserController')->except([
             'create', 'edit'
         ]);
 
