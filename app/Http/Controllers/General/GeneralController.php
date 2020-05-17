@@ -12,6 +12,7 @@ use App\Racecourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CareerResource;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\Eloquent\Builder;
 use App\Http\Resources\RacecourseResource;
@@ -251,7 +252,8 @@ class GeneralController extends ApiController {
 
         return $this->successResponse([
             'status' => 'correcto',
-            'carreras' => $carreras,
+            'carreras' => CareerResource::collection($carreras),
+            // 'carreras' => $carreras,
             'dias' => $fecha,
             'time' => date("Y-m-d H:i:s"),
         ], 200);
@@ -277,7 +279,7 @@ class GeneralController extends ApiController {
         // return $query;
 
         return RacecourseResource::collection($query);
-        
+
         $query = Career::orderBy('racecourse_id', 'Desc');
 
         $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
