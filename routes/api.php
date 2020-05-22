@@ -127,7 +127,7 @@ Route::group(['middleware' => 'auth:api'], function () {
                 'create', 'edit'
             ]);
 
-            Route::post('/racecourses/{id}/sync', 'Admin\Horses\RacecourseController@syncCareers');
+            Route::post('/racecourses/{id}/sync/{date}', 'Admin\Horses\RacecourseController@syncCareers');
             Route::resource('racecourses', 'Admin\Horses\RacecourseController')->except([
                 'create', 'edit'
             ]);

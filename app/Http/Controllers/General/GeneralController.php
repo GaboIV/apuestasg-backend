@@ -234,7 +234,7 @@ class GeneralController extends ApiController {
         }
 
         
-        $careers = Cache::remember('careers', 60, function () use ($query, $indice, $indice2, $i) {
+        $careers = Cache::remember('careers' . '_' . $id, 60, function () use ($query, $indice, $indice2, $i) {
             $careers = $query->get();   
             
             foreach ($careers as $car) {   
@@ -272,9 +272,7 @@ class GeneralController extends ApiController {
         $indice2 = '';
         $carreras = [];
         $fecha_for_1 = date("Y-m-d H:i:s");
-        $fecha = [];
-
-        
+        $fecha = [];        
 
         $value = Cache::remember('users', 60, function () use ($fecha_for_1) {
             return Racecourse::whereHas('careers', function (Builder $query) use ($fecha_for_1) {
