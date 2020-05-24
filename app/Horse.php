@@ -9,7 +9,7 @@ class Horse extends Model
 {
     use Notifiable; 
 
-    protected $appends = ['edad', 'sexo'];
+    protected $appends = ['edad', 'sexo', 'jacket_url'];
 
     protected $with = ["father", "mother", "haras"];
     

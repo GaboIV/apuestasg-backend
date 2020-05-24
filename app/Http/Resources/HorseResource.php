@@ -18,7 +18,8 @@ class HorseResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'sexo' => $this->sexo,
-            'edad' => $this->edad
+            'edad' => $this->edad,
+            'jacket_url' => $this->jacket_url
         ];
     }
 }

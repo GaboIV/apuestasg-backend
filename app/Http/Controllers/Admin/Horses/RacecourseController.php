@@ -192,6 +192,14 @@ class RacecourseController extends ApiController{
                     } else {
                         $weight = 0;
                     }
+
+                    if (isset($ins->scratchIndicator)) {
+                        $status = ($ins->scratchIndicator == 'Y') ? 1 : 2;
+                    } elseif (isset($ins->status)) {
+                        $status = ($ins->scratchIndicator == 'LIVE') ? 1 : 2;
+                    } else {
+                        $status = 1;
+                    }
         
                     Inscription::updateOrCreate(
                         [
@@ -206,7 +214,8 @@ class RacecourseController extends ApiController{
                             'odd' => $ins->MLOdd ?? $ins->morningLineOdds ?? 0,
                             'weight' => $weight,
                             'medicines' => $ins->medication ?? null,
-                            'implements' => $ins->equipment ?? null
+                            'implements' => $ins->equipment ?? null,
+                            'status' => $status
                         ]
                     );
                 }  
