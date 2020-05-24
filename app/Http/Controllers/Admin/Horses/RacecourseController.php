@@ -57,13 +57,13 @@ class RacecourseController extends ApiController{
 
             $url_2 = 'https://xpbapi.drf.com/races/'. $date_2['2'] . "-" . $date_2['0'] . "-" . $date_2['1'] . '/track/' . $racecourse->acro;
 
-            // dd($url_1);
+            // dd($url_2);
 
             $tracks_1 = json_decode($client->request('GET', $url_1)->getBody());    
 
             $tracks_2 = json_decode($client->request('GET', $url_2)->getBody()); 
                 
-            // dd($tracks_1);
+            // dd($tracks_2);
 
             foreach ($tracks_1->races as $key_trk => $trk) {
 
@@ -123,50 +123,60 @@ class RacecourseController extends ApiController{
                     "status" => 1,
                     "grade" => null,
                     "purse" => $trk->purse,
-                    "age_restriction" => $trk->ageRestrictionDescription,
-                    "sex_restriction" => $trk->sexRestrictionDescription,
+                    "age_restriction" => $trk->ageRestrictionDescription ?? null,
+                    "sex_restriction" => $trk->sexRestrictionDescription ?? null,
                     "record" => null
                 ]);
 
                 // dd($tracks_2->tracks[$key_trk]->runners);
 
-                foreach ($tracks_2->tracks[$key_trk]->runners as $ins) { 
+                if (isset($tracks_2->tracks[$key_trk]->runners)) {
+                    $runners = $tracks_2->tracks[$key_trk]->runners;
+                } else {
+                    $runners = $trk->runners;
+                }
+
+                foreach ($runners as $ins) { 
                     
                     if (isset($ins->jockey)) {
                         $jockey = $ins->jockey;
 
-                        $jockeyName = trim(($jockey->firstName ? $jockey->firstName . " " : "") . ($jockey->lastName ? $jockey->lastName . " " : ""));
+                        $jockeyName = trim(($jockey->firstName ? $jockey->firstName . " " : "") . (isset($jockey->middleName) ? $jockey->middleName . " " : "") . ($jockey->lastName ? $jockey->lastName . " " : ""));
 
                         $jockey = Jockey::firstOrCreate(
                             [ "name" =>  $jockeyName],
                             [ "name_id" => $jockeyName, "country_id" => $racecourse->country->id ]
                         );
+                    } else {
+                        $jockey = null;
                     }
 
                     if ($ins->trainer) {     
                         $trainer = $ins->trainer;
 
-                        $trainerName = trim(($trainer->firstName ? $trainer->firstName . " " : "") . ($trainer->lastName ? $trainer->lastName . " " : ""));
+                        $trainerName = trim(($trainer->firstName ? $trainer->firstName . " " : "") . (isset($trainer->middleName) ? $trainer->middleName . " " : "") . ($trainer->lastName ? $trainer->lastName . " " : ""));
 
                         $trainer = Trainer::firstOrCreate(  
                             [ "name" =>  $trainerName],
                             [ "name_id" => $trainerName, "country_id" => $racecourse->country->id ]                    
                         );
                     } else {
-                        $jockey = null;
+                        $trainer = null;
                     }
 
-                    // if ($trk->sexRestrictionDescription == 'Horses' || $trk->sexRestrictionDescription == 'Geldings' || $trk->sexRestrictionDescription == 'Colts') {
-                    //     $sexHorse = "M";
-                    // } elseif ($trk->sexRestrictionDescription == 'Mares' || $trk->sexRestrictionDescription == 'Fillies' || $trk->sexRestrictionDescription == 'Females') {
-                    //     $sexHorse = "F";
-                    // } else {
-                    //     $sexHorse = "N";
-                    // }
+                    if (!isset($ins->gender)) {
+                        if ($trk->sexRestrictionDescription == 'Horses' || $trk->sexRestrictionDescription == 'Geldings' || $trk->sexRestrictionDescription == 'Colts') {
+                            $ins->gender = "M";
+                        } elseif ($trk->sexRestrictionDescription == 'Mares' || $trk->sexRestrictionDescription == 'Fillies' || $trk->sexRestrictionDescription == 'Females') {
+                            $ins->gender = "F";
+                        } else {
+                            $ins->gender = "N/A";
+                        }
+                    }
                     
                     $horse = Horse::updateOrCreate(
                         [
-                            "name" => $ins->name
+                            "name" => $ins->name ?? $ins->horseName
                         ],
                         [
                             "sex" => $ins->gender ?? null,
@@ -174,6 +184,14 @@ class RacecourseController extends ApiController{
                             "birthday" => (isset($ins->yearOfBirth)) ? $ins->yearOfBirth . "-01-01" : null
                         ]
                     );
+
+                    if (isset($ins->wtCarried)) {
+                        $weight = (round(($ins->wtCarried / 2.205) * 2) / 2);
+                    } elseif (isset($ins->wtCarried)) {
+                        $weight = (round(($ins->weight / 2.205) * 2) / 2);
+                    } else {
+                        $weight = 0;
+                    }
         
                     Inscription::updateOrCreate(
                         [
@@ -184,9 +202,9 @@ class RacecourseController extends ApiController{
                             "horse_id" => $horse->id,
                             "jockey_id" => $jockey->id ?? null,
                             'trainer_id' => $trainer->id,
-                            'position' => $ins->postPosition,
-                            'odd' => $ins->MLOdd ?? 0,
-                            'weight' => (round(($ins->wtCarried / 2.205) * 2) / 2),
+                            'position' => $ins->postPosition ?? $ins->postPos,
+                            'odd' => $ins->MLOdd ?? $ins->morningLineOdds ?? 0,
+                            'weight' => $weight,
                             'medicines' => $ins->medication ?? null,
                             'implements' => $ins->equipment ?? null
                         ]
