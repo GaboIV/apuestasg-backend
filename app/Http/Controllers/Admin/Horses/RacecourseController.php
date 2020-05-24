@@ -136,7 +136,7 @@ class RacecourseController extends ApiController{
                     $runners = $trk->runners;
                 }
 
-                foreach ($runners as $ins) { 
+                foreach ($runners as $key_ins => $ins) { 
                     
                     if (isset($ins->jockey)) {
                         $jockey = $ins->jockey;
@@ -196,9 +196,34 @@ class RacecourseController extends ApiController{
                     if (isset($ins->scratchIndicator)) {
                         $status = ($ins->scratchIndicator == 'Y') ? 1 : 2;
                     } elseif (isset($ins->status)) {
-                        $status = ($ins->scratchIndicator == 'LIVE') ? 1 : 2;
+                        $status = ($ins->status == 'LIVE') ? 1 : 2;
                     } else {
                         $status = 1;
+                    }
+
+                    if (isset($ins->status)) {
+                        $horse_active = array_filter(
+                            $trk->runners,
+                            function ($e) use ($ins) {
+                                return $e->horseName == $ins->name;
+                            }
+                        );
+
+                        if (isset($horse_active[0]->liveOdds)) {
+                            $odd = $horse_active[0]->liveOdds;
+                        } elseif (isset($ins->MLOdd)) {
+                            $odd = $ins->MLOdd;
+                        } else {
+                            $odd = 0;
+                        }
+                    } elseif(isset($ins->scratchIndicator)) {
+                        if (isset($ins->liveOdds)) {
+                            $odd = $ins->liveOdds;
+                        } elseif (isset($ins->morningLineOdds)) {
+                            $odd = $ins->morningLineOdds;
+                        } else {
+                            $odd = 0;
+                        }
                     }
         
                     Inscription::updateOrCreate(
@@ -211,7 +236,7 @@ class RacecourseController extends ApiController{
                             "jockey_id" => $jockey->id ?? null,
                             'trainer_id' => $trainer->id,
                             'position' => $ins->postPosition ?? $ins->postPos,
-                            'odd' => $ins->MLOdd ?? $ins->morningLineOdds ?? 0,
+                            'odd' => $odd ?? 0,
                             'weight' => $weight,
                             'medicines' => $ins->medication ?? null,
                             'implements' => $ins->equipment ?? null,
