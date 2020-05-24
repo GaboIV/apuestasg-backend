@@ -74,14 +74,17 @@ class RacecourseController extends ApiController{
                 if ($trk->distanceUnit == ''){
                     $data_trk = explode("|", $trk->raceTypeDescription);
 
-                    if (strpos($data_trk[0], "f") != false){
+                    if (strpos(strtolower($data_trk[0]), "f") != false){
                         $trk->distanceUnit = "F";
                         $distance_explode = explode("f", trim($data_trk[0]));
                         $trk->distanceValue = $this->parseFraction($distance_explode[0]);
-                    } elseif (strpos($data_trk[0], "m") != false){
+                    } elseif (strpos(strtolower($data_trk[0]), "m") != false){
                         $trk->distanceUnit = "M";
                         $distance_explode = explode("m", trim($data_trk[0]));
                         $trk->distanceValue = $this->parseFraction($distance_explode[0]);
+                    } else {
+                        $trk->distanceUnit = "MT";
+                        $trk->distanceValue = trim($data_trk[0]);
                     }
                 }
                 
@@ -91,7 +94,9 @@ class RacecourseController extends ApiController{
                     $distance = ($trk->distanceValue / 1.094);
                 } elseif ($trk->distanceUnit == "M") {
                     $distance = $trk->distanceValue * 1609.34;
-                }                
+                } elseif ($trk->distanceUnit == "MT") {
+                    $distance = $trk->distanceValue;
+                }             
 
                 if ($trk->surfaceDescription == "Turf") {
                     $surface = "Grama";
@@ -166,7 +171,7 @@ class RacecourseController extends ApiController{
                         [
                             "sex" => $ins->gender ?? null,
                             "color" => $ins->color ?? null,
-                            "birthday" => $ins->yearOfBirth ? $ins->yearOfBirth . "-01-01" : null
+                            "birthday" => (isset($ins->yearOfBirth)) ? $ins->yearOfBirth . "-01-01" : null
                         ]
                     );
         
@@ -180,7 +185,7 @@ class RacecourseController extends ApiController{
                             "jockey_id" => $jockey->id ?? null,
                             'trainer_id' => $trainer->id,
                             'position' => $ins->postPosition,
-                            'odd' => $ins->MLOdd,
+                            'odd' => $ins->MLOdd ?? 0,
                             'weight' => (round(($ins->wtCarried / 2.205) * 2) / 2),
                             'medicines' => $ins->medication ?? null,
                             'implements' => $ins->equipment ?? null
