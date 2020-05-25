@@ -106,6 +106,8 @@ class RacecourseController extends ApiController{
 
                 $raceKey = $trk->raceKey;
 
+                \Log::info($distance);
+
                 // $s = $raceKey->raceDate->year . "-" . ($raceKey->raceDate->month + 1) . "-" . $raceKey->raceDate->day . " " . $trk->postTime;
                 // $stro_date = strtotime($s);
                 $posttime = date('Y-m-d H:i:s', ($trk->postTimeLong / 1000)); 
@@ -118,7 +120,7 @@ class RacecourseController extends ApiController{
                     "name" => trim($trk->raceClass) . ", " . trim($trk->sexRestrictionDescription) . ", " . trim($trk->ageRestrictionDescription),
                     "title" => $trk->raceTypeDescription,
                     "posttime" => $posttime,
-                    "distance" => number_format($distance, 0, '.', ''),
+                    "distance" => is_numeric($distance) ? number_format($distance, 0, '.', '') : 0,
                     "surface" => $surface ?? null,
                     "status" => 1,
                     "grade" => null,
@@ -136,7 +138,7 @@ class RacecourseController extends ApiController{
                     $runners = $trk->runners;
                 }
 
-                foreach ($runners as $ins) { 
+                foreach ($runners as $key_ins => $ins) { 
                     
                     if (isset($ins->jockey)) {
                         $jockey = $ins->jockey;
@@ -151,7 +153,7 @@ class RacecourseController extends ApiController{
                         $jockey = null;
                     }
 
-                    if ($ins->trainer) {     
+                    if (isset($ins->trainer)) {     
                         $trainer = $ins->trainer;
 
                         $trainerName = trim(($trainer->firstName ? $trainer->firstName . " " : "") . (isset($trainer->middleName) ? $trainer->middleName . " " : "") . ($trainer->lastName ? $trainer->lastName . " " : ""));
@@ -196,9 +198,34 @@ class RacecourseController extends ApiController{
                     if (isset($ins->scratchIndicator)) {
                         $status = ($ins->scratchIndicator == 'Y') ? 1 : 2;
                     } elseif (isset($ins->status)) {
-                        $status = ($ins->scratchIndicator == 'LIVE') ? 1 : 2;
+                        $status = ($ins->status == 'LIVE') ? 1 : 2;
                     } else {
                         $status = 1;
+                    }
+
+                    if (isset($ins->status)) {
+                        $horse_active = array_filter(
+                            $trk->runners,
+                            function ($e) use ($ins) {
+                                return $e->horseName == $ins->name;
+                            }
+                        );
+
+                        if (isset($horse_active[0]->liveOdds)) {
+                            $odd = $horse_active[0]->liveOdds;
+                        } elseif (isset($ins->MLOdd)) {
+                            $odd = $ins->MLOdd;
+                        } else {
+                            $odd = 0;
+                        }
+                    } elseif(isset($ins->scratchIndicator)) {
+                        if (isset($ins->liveOdds)) {
+                            $odd = $ins->liveOdds;
+                        } elseif (isset($ins->morningLineOdds)) {
+                            $odd = $ins->morningLineOdds;
+                        } else {
+                            $odd = 0;
+                        }
                     }
         
                     Inscription::updateOrCreate(
@@ -209,9 +236,9 @@ class RacecourseController extends ApiController{
                         [
                             "horse_id" => $horse->id,
                             "jockey_id" => $jockey->id ?? null,
-                            'trainer_id' => $trainer->id,
+                            'trainer_id' => $trainer->id ?? null,
                             'position' => $ins->postPosition ?? $ins->postPos,
-                            'odd' => $ins->MLOdd ?? $ins->morningLineOdds ?? 0,
+                            'odd' => $odd ?? 0,
                             'weight' => $weight,
                             'medicines' => $ins->medication ?? null,
                             'implements' => $ins->equipment ?? null,

@@ -22,6 +22,7 @@ class CareerResource extends JsonResource
             'posttime' => $this->posttime,
             'distance' => $this->distance,
             'number' => $this->number,
+            'surface' => $this->surface,
             'div' => $this->div,
             'dia' => $this->dia,
             'racecourse' => new RacecourseResource($this->racecourse),
