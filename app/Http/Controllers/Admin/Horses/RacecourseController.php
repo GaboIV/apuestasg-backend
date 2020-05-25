@@ -106,6 +106,8 @@ class RacecourseController extends ApiController{
 
                 $raceKey = $trk->raceKey;
 
+                \Log::info($distance);
+
                 // $s = $raceKey->raceDate->year . "-" . ($raceKey->raceDate->month + 1) . "-" . $raceKey->raceDate->day . " " . $trk->postTime;
                 // $stro_date = strtotime($s);
                 $posttime = date('Y-m-d H:i:s', ($trk->postTimeLong / 1000)); 
@@ -118,7 +120,7 @@ class RacecourseController extends ApiController{
                     "name" => trim($trk->raceClass) . ", " . trim($trk->sexRestrictionDescription) . ", " . trim($trk->ageRestrictionDescription),
                     "title" => $trk->raceTypeDescription,
                     "posttime" => $posttime,
-                    "distance" => number_format($distance, 0, '.', ''),
+                    "distance" => is_numeric($distance) ? number_format($distance, 0, '.', '') : 0,
                     "surface" => $surface ?? null,
                     "status" => 1,
                     "grade" => null,
@@ -151,7 +153,7 @@ class RacecourseController extends ApiController{
                         $jockey = null;
                     }
 
-                    if ($ins->trainer) {     
+                    if (isset($ins->trainer)) {     
                         $trainer = $ins->trainer;
 
                         $trainerName = trim(($trainer->firstName ? $trainer->firstName . " " : "") . (isset($trainer->middleName) ? $trainer->middleName . " " : "") . ($trainer->lastName ? $trainer->lastName . " " : ""));
@@ -234,7 +236,7 @@ class RacecourseController extends ApiController{
                         [
                             "horse_id" => $horse->id,
                             "jockey_id" => $jockey->id ?? null,
-                            'trainer_id' => $trainer->id,
+                            'trainer_id' => $trainer->id ?? null,
                             'position' => $ins->postPosition ?? $ins->postPos,
                             'odd' => $odd ?? 0,
                             'weight' => $weight,
