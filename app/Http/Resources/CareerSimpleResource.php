@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CareerResource extends JsonResource
+class CareerSimpleResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -25,9 +25,7 @@ class CareerResource extends JsonResource
             'number' => $this->number,
             'surface' => $this->surface,
             'div' => $this->div,
-            'dia' => $this->dia,
-            'racecourse' => new RacecourseResource($this->racecourse),
-            'inscriptions' => InscriptionResource::collection($this->inscriptions)
+            'dia' => $this->dia
         ];
     }
 }

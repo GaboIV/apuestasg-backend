@@ -19,7 +19,8 @@ class RacecourseResource extends JsonResource
             'name' => $this->name,
             'country' => $this->location,
             'country_image' => url("api/images/countries/" . $this->location . ".png"),
-            'careers_count' => $this->careers_count
+            'careers' => CareerSimpleResource::collection($this->careers),
+            'careers_count' => count($this->careers)
         ];
     }
 }
