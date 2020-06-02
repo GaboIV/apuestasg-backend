@@ -9,7 +9,7 @@ class Horse extends Model
 {
     use Notifiable; 
 
-    protected $appends = ['edad', 'sexo', 'jacket_url'];
+    protected $appends = ['edad', 'sexo'];
 
     protected $with = ["father", "mother", "haras"];
     
@@ -96,4 +96,8 @@ class Horse extends Model
             return "S/I";
         }
     }
+
+    // public function getJacketUrlAttribute() {
+
+    // }
 }

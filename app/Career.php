@@ -9,7 +9,7 @@ class Career extends Model {
 
 	protected $appends = ['dia'];
 
-	protected $with = ["racecourse"];
+	// protected $with = ["racecourse"];
 
     protected $fillable = [
         'code',

@@ -28,7 +28,7 @@ class GeneralController extends ApiController {
     	$fecha = date("Y-m-d H:i:s");
     	
         return $this->successResponse([
-            'fecha' => $fecha
+            'fecha' => strtotime($fecha)
         ], 200);
     }
 
@@ -278,7 +278,7 @@ class GeneralController extends ApiController {
             return Racecourse::whereHas('careers', function (Builder $query) use ($fecha_for_1) {
                         $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
                     })
-                    ->withCount([
+                    ->with([
                         'careers' => function ($query) use ($fecha_for_1) {
                             $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
                     }])
