@@ -14,7 +14,9 @@ class Selection extends Model {
     protected $appends = ['team_name', 'status'];
 
 	protected $fillable = [
-        'ticket_id', 'player_id', 'type'
+        'ticket_id', 
+        'player_id', 
+        'type'
     ];
 
     public function player() {

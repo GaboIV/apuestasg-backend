@@ -15,7 +15,7 @@ class TeamController extends ApiController {
                     if (request()->criterio != 'todos') {
                         foreach($criterios as $keyword) {
                             $query->orWhere('name', 'LIKE', "%$keyword%");
-                            $query->orWhere('name_uk', 'LIKE', "%$keyword%");
+                            $query->orWhere('name_id', 'LIKE', "%$keyword%");
                         }
                     }                    
                 })

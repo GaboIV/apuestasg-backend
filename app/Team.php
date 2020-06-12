@@ -10,7 +10,8 @@ class Team extends Model {
     protected $fillable = [
         'country_id',
         'name',
-        'name_uk'
+        'name_id',
+        'web_id'
     ];
 
     public function leagues() {

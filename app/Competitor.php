@@ -5,8 +5,6 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 class Competitor extends Model {
-    
-    protected $with = ["team"];
 
     protected $fillable = [
         'code',
@@ -16,14 +14,16 @@ class Competitor extends Model {
         'odd',
         'fact',
         'link',
-        'status'
+        'status',
+        'data',
+        'provider'
+    ];
+
+    protected $casts = [
+        'data' => 'array'
     ];
 
     public function game() {
         return $this->belongsTo(Game::class, 'game_id', 'id');
-    }
-
-    public function team() {
-        return $this->hasOne(Team::class, 'id', 'team_id');
     }
 }

@@ -47,40 +47,31 @@ class SessionController extends ApiController {
                 } else {                    
                     $tipo = "2x";
 
-                    $id_part_2 = $sel->competitor["id"];
-                    $id_equipo = $sel->competitor["team_id"];
-                    $div_equipo_part1 = $sel["value"];
-
-                    $div_div = explode("/", $div_equipo_part1);
-
-                    if (!isset($div_div[1])) {
-                        $div_div[1] = 1;
-                    }
-
-                    $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-                    $decim_tot = $decim_tot * $decimal_odd;
+                    $selecciones[$i]['encuentro'] = $sel->game->encuentro;
 
                     foreach ($sel->game->competitors as $comp) {
                         if ($comp->id == $sel->select_id) {
                             $f8 = $comp;
                             break;
                         }
-                    }             
+                    }
 
-                    $id_partido = $f8["game_id"];
+                    foreach ($f8->data as $key => $item) {
+                        if ($item['caption'] == $sel->type) {
+                            $selected_item = $item;
+                            break;
+                        }
+                    }
 
-                    $name_partido =  $sel->game->web_id;
+                    if ($selected_item['caption'] == "X") {
+                        $selection_name = "Empate";
+                    } else {
+                        $selection_name = $sel->game->teams[$selected_item['caption'] - 1]->name;
+                    }
 
-                    $selecciones[$i]['value'] = $sel->value; 
-                    $selecciones[$i]['id'] = $sel->id;   
-                    $selecciones[$i]['equipo'] = $f8->team->name;
-                    
-                    $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-
-                    if (count($sel->game->competitors) == 2)
-                        $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
-                    elseif (count($sel->game->competitors) == 3)
-                        $selecciones[$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];
+                    $selecciones[$i]['value'] = $selections[$i]->value; 
+                    $selecciones[$i]['id'] = $selections[$i]->id;   
+                    $selecciones[$i]['equipo'] = $selection_name;
                 } 
                 $i++;  
             }
@@ -106,13 +97,14 @@ class SessionController extends ApiController {
         $tipo = '';
         
         $exists = Selection::whereSelectId($data['bet_id'])
+        ->where('type', $data['item_id'])
         ->where('player_id', $player->id)
         ->where(function ($query) {
             $query->where('ticket_id', '0')
                   ->orWhere('ticket_id', '')
                   ->orWhere('ticket_id', null);
         })
-        ->first();
+        ->first() ?? null;
 
         if ($exists) {
             $exists->delete();
@@ -128,14 +120,19 @@ class SessionController extends ApiController {
             ->first();
 
             if (isset($exists1) && $exists1->category_id == '7') {
-                $mstatus = "No se pueden combinar selecciones de deporte e hipismo";
+                $mstatus = "No puede combinar selecciones de deporte e hipismo";
                 $status = 'warning';
                 $selecciones = [];
                 $tipo = '7';
             } else {
                 $competitor = Competitor::whereId($data['bet_id'])->first();
 
-                $odd = $competitor["odd"];
+                foreach ($competitor->data as $key => $item) {
+                    if ($item['caption'] == $data['item_id'])
+                        $selected = $item;
+                }
+
+                $odd = $selected['quoteFloatValue'];
                 $game_id = $competitor["game_id"];
 
                 $exists2 = Selection::whereSample($game_id)
@@ -153,6 +150,7 @@ class SessionController extends ApiController {
                 } else {
                     $selection = new Selection;
                     $selection->select_id = $data['bet_id'];
+                    $selection->type = $data['item_id'];
                     $selection->sample = $game_id;
                     $selection->value = $odd;
                     $selection->category_id = $data['category_id'];
@@ -175,19 +173,9 @@ class SessionController extends ApiController {
                 if ($sel->game->start <= date("Y-m-d H:i:s")) {
                     $sel->delete();
                 } else {
-                    $odd_fracc = $sel["value"];
-                    $div_div = explode("/", $odd_fracc);
-                    if (!isset($div_div[1])) {
-                        $div_div[1] = 1;
-                    }       
-                    $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
-                    $decim_tot = $decim_tot * $decimal_odd;
+                    $decim_tot = $decim_tot * (float) $sel->value;
 
-                    if (count($sel->game->competitors) == '3') {
-                        $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][2]['team']['name'];
-                    } elseif (count($sel->game->competitors) == '2') {
-                        $selecciones[$i]['encuentro'] = $sel['game']['competitors'][0]['team']['name'] . " vs " . $sel['game']['competitors'][1]['team']['name'];
-                    }
+                    $selecciones[$i]['encuentro'] = $sel->game->encuentro;
 
                     foreach ($sel->game->competitors as $comp) {
                         if ($comp->id == $sel->select_id) {
@@ -196,9 +184,22 @@ class SessionController extends ApiController {
                         }
                     }
 
+                    foreach ($f8->data as $key => $item) {
+                        if ($item['caption'] == $sel->type) {
+                            $selected_item = $item;
+                            break;
+                        }
+                    }
+
+                    if ($selected_item['caption'] == "X") {
+                        $selection_name = "Empate";
+                    } else {
+                        $selection_name = $sel->game->teams[$selected_item['caption'] - 1]->name;
+                    }
+
                     $selecciones[$i]['value'] = $selections[$i]->value; 
                     $selecciones[$i]['id'] = $selections[$i]->id;   
-                    $selecciones[$i]['equipo'] = $f8->team->name;
+                    $selecciones[$i]['equipo'] = $selection_name;
 
                     $i++;
                 }

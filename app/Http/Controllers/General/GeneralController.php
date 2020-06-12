@@ -126,12 +126,11 @@ class GeneralController extends ApiController {
         $juegos = Game::where('start', '>=', date("Y-m-d H:i:s"))
         ->with('competitors')
         ->with('league')
-        ->whereHas('competitors.team', function ($queryC) use ($criterios) {
-
-                foreach($criterios as $keyword) {
-                    $queryC->Where('name', 'LIKE', "%$keyword%");
-                }
-           
+        ->whereHas('teams', function ($queryC) use ($criterios) {
+            foreach($criterios as $keyword) {
+                $queryC->Where('name', 'LIKE', "%$keyword%");
+                $queryC->orWhere('name_id', 'LIKE', "%$keyword%");
+            }           
         })
         ->orderBy('league_id', 'desc')
         ->orderBy('start', 'asc')

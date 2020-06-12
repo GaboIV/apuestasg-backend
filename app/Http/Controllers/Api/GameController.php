@@ -19,9 +19,7 @@ class GameController extends ApiController
 {
     public function index() {
         $games = Game::orderBy('start', 'desc')
-                     ->with(["competitors" => function($q) {
-                            $q->with('team');
-                        }])
+                     ->with(["competitors"])
                      ->with(["league" => function($q) {
                             $q->with('category');
                         }])

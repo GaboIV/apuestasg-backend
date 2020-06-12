@@ -57,6 +57,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         
         // Ligas
         Route::post('leagues/category/country', 'Api\LeagueController@byCategory');
+        Route::post('leagues/{id}/sync', 'Admin\LeagueController@sync');
         Route::resource('leagues', 'Api\LeagueController')->except([
             'create', 'edit'
         ]);
