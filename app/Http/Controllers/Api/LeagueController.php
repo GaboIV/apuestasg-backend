@@ -2,16 +2,31 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\ApiController;
-use App\Http\Requests\LeagueRequest;
 use App\League;
 use Illuminate\Http\Request;
+use App\Http\Requests\LeagueRequest;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\Eloquent\Builder;
 
-class LeagueController extends ApiController {
-
+class LeagueController extends ApiController 
+{
     public function index() {
-        $leagues = League::orderBy('id', 'desc')
-                              ->paginate(50);
+        $criterios = explode(" ", request()->criterio);
+
+        $leagues = League::where(function($query) use($criterios){
+                    if (request()->criterio != 'todas') {
+                        foreach($criterios as $keyword) {
+                            $query->orWhere('name', 'LIKE', "%$keyword%");
+                            $query->orWhere('name_uk', 'LIKE', "%$keyword%");
+                            $query->orWhere('description', 'LIKE', "%$keyword%");
+                            $query->orWhereHas('country', function (Builder $query) use ($keyword) {
+                                $query->where('name', 'LIKE', "%$keyword%");
+                            });
+                        }
+                    }                    
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(25);
 
         return $this->successResponse([
             'leagues' => $leagues

@@ -75,11 +75,26 @@ class LeagueController extends ApiController
 
                 foreach ($game->resultSet3s as $key => $option_type) {
                     $bet_type = BetType::whereName($option_type->type)->first();
+
+                    $ht = null;
+
+                    if (strpos($bet_type->name, 'section-') !== false) {
+                        if (strpos($option_type->name, '1.') !== false) {
+                            $ht = 1;
+                        } elseif (strpos($option_type->name, '2.') !== false) {
+                            $ht = 2;
+                        } else {
+                            $ht = null;
+                        }
+                    } else {
+                        $ht = null;
+                    }
                          
                     Competitor::updateOrCreate([
                         "game_id" => $match->id,
                         "code" => $option_type->fixedParamText,
                         "bet_type_id" => $bet_type->id,
+                        "HT" => $ht
                     ],[
                         "data" => $option_type->results,
                         "provider" => "tipico"

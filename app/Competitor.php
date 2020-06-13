@@ -16,6 +16,7 @@ class Competitor extends Model {
         'link',
         'status',
         'data',
+        'HT',
         'provider'
     ];
 

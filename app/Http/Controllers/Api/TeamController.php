@@ -21,7 +21,7 @@ class TeamController extends ApiController {
                 })
                 ->orderBy('id', 'desc')
                 ->with('leagues')
-                ->paginate(50);
+                ->paginate(25);
 
         return $this->successResponse([
             'teams' => $teams
