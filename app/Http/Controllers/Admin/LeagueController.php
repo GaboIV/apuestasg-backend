@@ -52,11 +52,11 @@ class LeagueController extends ApiController
 
                 for ($i=1; isset($game->match->{"team" . $i}); $i++) { 
                     $teams[$i] = Team::firstOrCreate([
-                        "web_id" => $game->match->{"team" . $i . "Id"}
+                        "name_id" => $game->match->{"team" . $i}
                     ],[
+                        "web_id" => $game->match->{"team" . $i . "Id"},
                         "name" => $game->match->{"team" . $i},
-                        "name_id" => $game->match->{"team" . $i},
-                        "country_id" => $league->country_id
+                        "name_id" => $game->match->{"team" . $i}
                     ]);
 
                     $teams_id[] = $teams[$i]->id;

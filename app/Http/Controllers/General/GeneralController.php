@@ -79,8 +79,8 @@ class GeneralController extends ApiController {
             $q->where('start', '<=',date("Y-m-d") . " 23:59");
         }
         
-        $juegos = $q->with('competitors')
-        ->with(array('league' => function($query) {
+        $juegos = $q->with('competitors.bet_type')
+        ->with(array('league.country' => function($query) {
             $query->orderBy('importance', 'DESC');
         }))
         ->whereHas('league', function ($query) use ($id) {
@@ -125,7 +125,7 @@ class GeneralController extends ApiController {
 
         $juegos = Game::where('start', '>=', date("Y-m-d H:i:s"))
         ->with('competitors')
-        ->with('league')
+        ->with('league.country')
         ->whereHas('teams', function ($queryC) use ($criterios) {
             foreach($criterios as $keyword) {
                 $queryC->Where('name', 'LIKE', "%$keyword%");
@@ -176,7 +176,7 @@ class GeneralController extends ApiController {
 
         $destacados = Game::where('start', '>=', date("Y-m-d H:i:s"))
         ->whereOutstanding(true)
-        ->with('competitors')
+        ->with('competitors.bet_type')
         ->with('league')
         ->limit(12)  
         ->get();

@@ -27,4 +27,8 @@ class Competitor extends Model {
     public function game() {
         return $this->belongsTo(Game::class, 'game_id', 'id');
     }
+
+    public function bet_type() {
+        return $this->hasOne(BetType::class, 'id', 'bet_type_id');
+    }
 }

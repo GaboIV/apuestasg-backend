@@ -19,7 +19,7 @@ class GameController extends ApiController
 {
     public function index() {
         $games = Game::orderBy('start', 'desc')
-                     ->with(["competitors"])
+                     ->with(["competitors.bet_type"])
                      ->with(["league" => function($q) {
                             $q->with('category');
                         }])
@@ -341,10 +341,9 @@ class GameController extends ApiController
         }
 
         if (isset($data['name']) && $data['name'] != '' && $data['name'] != 'todos' && $data['name'] != 'todas') {
-        	$query->whereHas('competitors', function ($queryC) use ($data) {
-            	$queryC->whereHas('team', function ($queryT) use ($data) {
-            		$queryT->where('name', 'like', '%' . $data['name'] . '%');
-				});
+        	$query->whereHas('teams', function ($queryC) use ($data) {
+            	$queryC->Where('name', 'LIKE', "%" . $data['name'] . "%");
+                $queryC->orWhere('name_id', 'LIKE', "%" . $data['name'] . "%");
 			});
         }
 

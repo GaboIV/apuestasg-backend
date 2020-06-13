@@ -23,7 +23,7 @@ class Game extends Model {
     ];
 
     protected $casts = [
-        'teams_id' => 'json'
+        'teams_id' => 'array'
     ];
 
     public function competitors() {
