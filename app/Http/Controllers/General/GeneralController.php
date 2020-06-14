@@ -106,9 +106,7 @@ class GeneralController extends ApiController {
                 $juego['manana'] = true;
                 $liga_date = $juego->league_id;
             }          
-        }
-
-        
+        }       
 
         return $this->successResponse([
             'juegos' => $juegos

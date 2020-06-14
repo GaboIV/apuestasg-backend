@@ -44,4 +44,15 @@ class AdminController extends ApiController {
             'changelogs' => $changelog
         ], 200);
     }
+
+    public function updateCountry(Request $request, $id) {
+        $data = $request->all();
+
+        $country = Country::whereId($id)
+                   ->update($data);
+
+        return $this->successResponse([
+            'status' => 'success'
+        ], 200);
+    }
 }

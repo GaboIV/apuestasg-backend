@@ -88,6 +88,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         //Paises
         Route::get('countries', 'Admin\AdminController@loadCountries');
+        Route::put('countries/{id}', 'Admin\AdminController@updateCountry');
 
         // Studs
         Route::resource('studs', 'Admin\Horses\StudController')->except([
