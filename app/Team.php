@@ -19,6 +19,10 @@ class Team extends Model {
        return $this->belongsToMany('\App\League', 'league_team')->withTimestamps();
     }
 
+    public function country() {
+        return $this->hasOne(Country::class, 'id', 'country_id');
+    }
+
     public function getImageAttribute() { 
     	$file = storage_path("app/teams/" . $this->id . ".png");
 

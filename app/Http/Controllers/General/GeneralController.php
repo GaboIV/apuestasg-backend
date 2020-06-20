@@ -83,6 +83,7 @@ class GeneralController extends ApiController {
         ->with(array('league.country' => function($query) {
             $query->orderBy('importance', 'DESC');
         }))
+        ->with('teams.country')
         ->whereHas('league', function ($query) use ($id) {
             $query->where('category_id', $id);
             $query->orderBy('importance', 'desc');
@@ -92,7 +93,6 @@ class GeneralController extends ApiController {
         ->orderBy('leagues.importance', 'desc')
         ->orderBy('league_id', 'desc')
         ->orderBy('start', 'asc')
-        
         ->orderBy('id', 'desc')
         ->get();
 
@@ -176,6 +176,7 @@ class GeneralController extends ApiController {
         ->whereOutstanding(true)
         ->with('competitors.bet_type')
         ->with('league')
+        ->with('teams.country')
         ->limit(12)  
         ->get();
 
