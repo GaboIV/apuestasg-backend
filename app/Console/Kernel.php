@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\SyncLeagues;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        SyncLeagues::class
     ];
 
     /**
@@ -24,7 +25,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('telescope:prune')->everyMinute();
+        $schedule->command('telescope:prune')->dailyAt('00:00');
+
+        $schedule->command('sync:leagues')->hourly();
     }
 
     /**

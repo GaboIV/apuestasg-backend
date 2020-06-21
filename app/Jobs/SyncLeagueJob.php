@@ -1,23 +1,40 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Jobs;
 
 use App\Game;
 use App\Team;
-use App\League;
 use App\BetType;
-use App\Country;
-use App\Category;
 use App\Competitor;
-use App\Helpers\Functions;
-use App\Jobs\SyncLeagueJob;
-use Illuminate\Http\Request;
-use App\Http\Controllers\ApiController;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 
-class LeagueController extends ApiController
+class SyncLeagueJob implements ShouldQueue
 {
-    public function sync($id) {
-        $league = League::whereId($id)->first();
+    use Dispatchable, InteractsWithQueue, Queueable;
+    public $league;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct($league)
+    {
+        $this->league = $league; 
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        $league = $this->league;
 
         if ($league->name_uk) {
             foreach ($league->name_uk as $key => $sync_id) {
@@ -108,49 +125,6 @@ class LeagueController extends ApiController
             }                
         }
 
-        return $this->successResponse(true, 200);
-    }
-
-    public function syncLeagues48() {
-        $client = new \GuzzleHttp\Client(['verify' => false, 'headers' => [
-            'Content-Type' => 'text/plain'
-        ]]);
-
-        $url = 'https://sports.tipico.de/json/program/navigationTree/48hrs';
-
-        $data = json_decode($client->request('GET', $url)->getBody());
-
-        foreach ($data->children as $key => $category) {
-            $category_ids[] = $category->icon;
-
-            $category_db = Category::whereNameId($category->icon)->first();
-
-            if ($category)
-                $categories[] = $category_db;
-
-            foreach ($category->children as $key => $country) {
-                foreach ($country->children as $key => $league) {
-                    $leagues[] = (int) $league->groupId;
-                }
-            }
-
-            $query_league = League::orderBy('name');
-
-            foreach( $leagues as $league_item) {
-                $query_league->orWhereRaw("JSON_CONTAINS(name_uk, ?)", [$league_item]);
-            }
-
-            $leagues_db = $query_league->get();
-
-            foreach ($leagues_db as $key => $league_job) {
-                $job_league = new SyncLeagueJob($league_job);
-                dispatch($job_league);
-            }
-
-            $leagues_db = [];
-            $leagues = [];
-        }
-
-        return $this->successResponse($leagues_db ?? [], 200);
+        return true;
     }
 }
