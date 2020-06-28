@@ -65,20 +65,21 @@ class SyncLeagues extends Command
             $query_league = League::orderBy('name');
 
             foreach( $leagues as $league_item) {
-                $query_league->orWhereRaw("JSON_CONTAINS(name_uk, ?)", [$league_item]);
+                // $query_league->orWhereRaw("JSON_CONTAINS(name_uk, ?)", $league_item);
+
+                $query_league->orWhere('name_uk', 'like', '%'.$league_item.'%');
             }
 
             $leagues_db = $query_league->get();
 
             foreach ($leagues_db as $key => $league_job) {
                 $job_league = new SyncLeagueJob($league_job);
+                \Log::info($league_job->name);
                 dispatch($job_league);
             }
 
             $leagues_db = [];
             $leagues = [];
         }
-
-        return true;
     }
 }

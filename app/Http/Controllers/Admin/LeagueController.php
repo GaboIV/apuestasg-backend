@@ -25,7 +25,7 @@ class LeagueController extends ApiController
                     'Content-Type' => 'text/plain'
                 ]]);
     
-                $url = 'https://sports.tipico.de/json/program/selectedEvents/all/' . $sync_id . "/";
+                $url = 'https://sports.tipico.de/json/program/selectedEvents/all/' . $sync_id . "/?apiVersion=1";
     
                 $data = json_decode($client->request('GET', $url)->getBody());
     
@@ -137,7 +137,9 @@ class LeagueController extends ApiController
             $query_league = League::orderBy('name');
 
             foreach( $leagues as $league_item) {
-                $query_league->orWhereRaw("JSON_CONTAINS(name_uk, ?)", [$league_item]);
+                // $query_league->orWhereRaw("JSON_CONTAINS(name_uk, ?)", $league_item);
+
+                $query_league->orWhere('name_uk', 'like', '%'.$league_item.'%');
             }
 
             $leagues_db = $query_league->get();
@@ -151,6 +153,6 @@ class LeagueController extends ApiController
             $leagues = [];
         }
 
-        return $this->successResponse($leagues_db ?? [], 200);
+        return $this->successResponse($leagues_db ?? [], 200);        
     }
 }
