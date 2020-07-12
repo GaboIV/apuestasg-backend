@@ -42,7 +42,7 @@ class SyncLeagueJob implements ShouldQueue
                     'Content-Type' => 'text/plain'
                 ]]);
     
-                $url = 'https://sports.tipico.de/json/program/selectedEvents/all/' . $sync_id . "/";
+                $url = 'https://sports.tipico.de/json/program/selectedEvents/all/' . $sync_id . "/?apiVersion=1";
     
                 $data = json_decode($client->request('GET', $url)->getBody());
     
@@ -124,6 +124,8 @@ class SyncLeagueJob implements ShouldQueue
                 }
             }                
         }
+
+        \Log::info("Sincronizada la liga: " . $league->name);
 
         return true;
     }
