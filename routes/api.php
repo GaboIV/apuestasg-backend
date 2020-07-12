@@ -56,6 +56,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('changelogs', 'Admin\AdminController@getChangelog');
         
         // Ligas
+        Route::patch('leagues/{id}/attach', 'Admin\LeagueController@attachNameUk');
+        Route::patch('leagues/{id}/dettach', 'Admin\LeagueController@dettachNameUk');
         Route::post('leagues/category/country', 'Api\LeagueController@byCategory');
         Route::post('leagues/{id}/sync', 'Admin\LeagueController@sync');
         Route::post('leagues/sync48', 'Admin\LeagueController@syncLeagues48');

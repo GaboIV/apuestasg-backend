@@ -153,4 +153,44 @@ class LeagueController extends ApiController
 
         return $this->successResponse($leagues_db ?? [], 200);
     }
+
+    public function attachNameUk(Request $request, $id) {
+        $data = $request->all();
+
+        $league = League::whereId($id)->first();
+
+        if (isset($league->name_uk)) {
+            if (! in_array($data['name_uk'], $league->name_uk)){
+                $arrays_name_uk = array_merge($league->name_uk, [$data['name_uk']]);
+    
+                $league->update([
+                    "name_uk" => $arrays_name_uk
+                ]);
+            }    
+        }            
+
+        return $this->successResponse([
+            'league' => $league
+        ], 200);
+    }
+
+    public function dettachNameUk(Request $request, $id) {
+        $data = $request->all();
+
+        $league = League::whereId($id)->first();
+
+        if (in_array($data['name_uk'], $league->name_uk)){
+            $arr = array_filter($league->name_uk, function($v) use ($data) {
+                return $v != $data['name_uk'];
+            });
+
+            $league->update([
+                "name_uk" => $arr
+            ]);
+        }        
+
+        return $this->successResponse([
+            'league' => $league
+        ], 200);
+    }
 }
