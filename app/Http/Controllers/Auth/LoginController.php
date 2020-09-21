@@ -173,10 +173,10 @@ class LoginController extends ApiController
             ); $o++;
 
             $menu[$o] = array(
-                'titulo' => 'Versiones',
+                'titulo' => 'Changelogs',
                 'icono' => 'fas fa-laptop-code',
-                'data' => 'Ir a Versiones',
-                'link' => 'changelog'
+                'data' => 'Ir a Changelogs',
+                'link' => 'tareas-pendientes'
             ); $o++;
 
         } elseif ($user->hasRole('player')) {                

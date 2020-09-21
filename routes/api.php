@@ -53,7 +53,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     // Rutas de Administrador
     Route::group(['prefix' => 'admin'], function () {
         // Chagelog
-        Route::get('changelogs', 'Admin\AdminController@getChangelog');
+        Route::resource('changelogs', 'Admin\ChangelogController')->except([
+            'create', 'edit'
+        ]);
         
         // Ligas
         Route::patch('leagues/{id}/attach', 'Admin\LeagueController@attachNameUk');

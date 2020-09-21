@@ -36,15 +36,6 @@ class AdminController extends ApiController {
         ], 200);
     }
 
-    public function getChangelog() {
-        $changelog = Changelog::orderBy('created_at', 'desc')
-        ->get();
-
-        return $this->successResponse([
-            'changelogs' => $changelog
-        ], 200);
-    }
-
     public function updateCountry(Request $request, $id) {
         $data = $request->all();
 
