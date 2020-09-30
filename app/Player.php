@@ -33,7 +33,6 @@ class Player extends Model {
         'lastname', 
         'birthday', 
         'gender', 
-        'state', 
         'city', 
         'parish', 
         'phone', 

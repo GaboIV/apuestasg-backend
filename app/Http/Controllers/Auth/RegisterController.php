@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\ApiController;
-use App\Http\Requests\PlayerRequest;
-use App\Player;
 use App\Role;
-use App\Transaction;
 use App\User;
+use App\Assist;
+use App\Player;
+use App\Transaction;
+use App\Configuration;
+use App\Jobs\SendRegisterMailJob;
+use App\Http\Requests\PlayerRequest;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends ApiController
@@ -43,9 +46,10 @@ class RegisterController extends ApiController
      */
     protected function createPlayer(PlayerRequest $request)
     {
-        $data = $request->all();  
+        $data = $request->validated();  
 
         $data['ip'] = '';
+        $host= $_SERVER["HTTP_HOST"];
 
         if (getenv('HTTP_CLIENT_IP')) {
             $data['ip'] = getenv('HTTP_CLIENT_IP');
@@ -78,7 +82,7 @@ class RegisterController extends ApiController
 
         $user = User::create($data);
 
-        if ($data['bonus'] == "ENTRADA_100K_AG")
+        if (isset($data['bonus']) && $data['bonus'] == "ENTRADA_100K_AG")
             $data['available'] = 100000;
         else 
             $data['available'] = 0;
@@ -94,44 +98,35 @@ class RegisterController extends ApiController
 
         $encab = "Usuario creado correctamente";
         $status = "success";
-        $mstatus = "Tiene un regalo de Bs. 100.000,00 para que disfrute de la pasión de las apuestas.";
+
+        if (isset($data['bonus']) && $data['bonus'] == "ENTRADA_100K_AG")
+            $mstatus = "Tiene un regalo de Bs. 100.000,00 para que disfrute de la pasión de las apuestas.";
+        else
+            $mstatus = "Gracias por registrarte en Apuestas G";
         
         $cod_serial = substr(md5(rand()),0,32);
 
-        // Envío de correo electrónico
+        $admin_email = Configuration::whereGroup('EMAIL')->whereSubgroup('REGISTER')->first()->value;
 
-        // Crear mensajes
-
-        // $host= $_SERVER["HTTP_HOST"];
-
-        // if ($host == 'localhost') {
-
-        //     $em = "INSERT INTO mensajes (titulo, para, texto, preliminar, cabeceras, desde, fecha_hora, id_usuario, serial, estatus) VALUES ('$titulo_msj','$para','$mensaje_msj','$preliminar','$cabeceras', 'Captación BetZone', '$fecha', '$id_usuario','$cod_serial','0')";
-        //     if($ecm = $db->query($em)){
-               
-        //     }
-            
-        // } elseif ($host == 'betzone.com.ve') {
-        //     if (mail($para, $titulo, $mensaje, $cabeceras)) {                       
-        //         $c5 = "UPDATE usuario SET urlAct='$linke_o' WHERE id_usuario='$id_usuario'";
-        //         $ec5 = $db->prepare($c5);
-        //         if ($ec5->execute()) {
-        //             $em = "INSERT INTO mensajes (titulo, para, texto, preliminar, cabeceras, desde, fecha_hora, id_usuario, serial, estatus) VALUES ('$titulo_msj','$para','$mensaje_msj','$preliminar','$cabeceras', 'Captación BetZone', '$fecha', '$id_usuario','$cod_serial','0')";
-        //             if($ecm = $db->query($em)){
-                       
-        //             }
-        //         }
-        //     }
-        // }
-        // 
-        if ($data['bonus'] == "ENTRADA_100K_AG") {
+        $assist = Assist::create([
+            "status" => 1,
+            "email_sent_player" => $user['email'],
+            "email_sent_admin" => $admin_email,
+            "admin_id" => null,
+            "player_id" => $user['email'],
+            "type" => "register"
+        ]);
+    
+        $this->dispatch(new SendRegisterMailJob($user, $player, $admin_email, $assist->id));
+       
+        if (isset($data['bonus']) && $data['bonus'] == "ENTRADA_100K_AG") {
             $transaction = Transaction::create([
                 "event_type_id" => 4,
                 "player_id" => $player->id,
                 "amount" => 100000,
                 "player_balance" => 100000
             ]);
-        }        
+        }    
 
         $result = array(
             "status" => $status,
@@ -139,7 +134,6 @@ class RegisterController extends ApiController
             "ip" => $data['ip'],
             "titulo" => $encab
         );
-        // $response['user'] = $user;
 
         return $this->successResponse($result, 201);
     }
