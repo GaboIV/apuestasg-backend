@@ -44,17 +44,18 @@ class SyncLeagueJob implements ShouldQueue
     
                 $url = 'https://sports.tipico.de/json/program/selectedEvents/all/' . $sync_id . "/?apiVersion=1";
     
-                $data = json_decode($client->request('GET', $url)->getBody());
+                $data = json_decode($client->request('GET', $url)->getBody())->SELECTION ?? null;
     
-                $key_sport = key($data->availableMarkets);                
+                $key_sport = key($data->availableMarkets);
 
-                if (isset($data->programData->$key_sport[0])) {
-                    $games = $data->programData->$key_sport[0]->lobbyEvents;
+                if (isset($data->sports) && in_array($key_sport, $data->sports) ) {
+
+                    $games = $data->events;
     
                     $bet_types = $data->availableMarkets->$key_sport;
         
                     foreach ($bet_types as $key => $bt) {
-                        $importance = 100;
+                        $importance = 50;
         
                         $bet_type = BetType::UpdateOrCreate([
                             "name" => $bt,
@@ -70,13 +71,13 @@ class SyncLeagueJob implements ShouldQueue
                         $teams = [];
                         $teams_id = [];
         
-                        for ($i=1; isset($game->match->{"team" . $i}); $i++) { 
+                        for ($i=1; isset($game->{"team" . $i}); $i++) { 
                             $teams[$i] = Team::firstOrCreate([
-                                "name_id" => $game->match->{"team" . $i}
+                                "name_id" => $game->{"team" . $i}
                             ],[
-                                "web_id" => $game->match->{"team" . $i . "Id"},
-                                "name" => $game->match->{"team" . $i},
-                                "name_id" => $game->match->{"team" . $i}
+                                "web_id" => $game->{"team" . $i . "Id"},
+                                "name" => $game->{"team" . $i},
+                                "name_id" => $game->{"team" . $i}
                             ]);
         
                             $teams_id[] = $teams[$i]->id;
@@ -85,23 +86,24 @@ class SyncLeagueJob implements ShouldQueue
                         }
         
                         $match = Game::updateOrCreate([
-                            "web_id" => $game->match->id,
+                            "web_id" => $game->id,
                             "league_id" => $league->id,
                         ],[
-                            "start" => date('Y-m-d H:i:s', ($game->match->numericDate / 1000)),
-                            "description" => $game->match->text,
+                            "start" => date('Y-m-d H:i:s', ($game->eventStartTime / 1000)),
+                            "description" => $game->eventInfo,
                             "teams_id" => (array) $teams_id,
                         ]);
         
-                        foreach ($game->resultSet3s as $key => $option_type) {
-                            $bet_type = BetType::whereName($option_type->type)->first();
+                        foreach ($data->matchOddGroups->{$game->id} as $key => $option_type) {
+
+                            $bet_type = BetType::whereName($key)->first();
         
                             $ht = null;
         
                             if (strpos($bet_type->name, 'section-') !== false) {
-                                if (strpos($option_type->name, '1.') !== false) {
+                                if (strpos($key, '1.') !== false) {
                                     $ht = 1;
-                                } elseif (strpos($option_type->name, '2.') !== false) {
+                                } elseif (strpos($key, '2.') !== false) {
                                     $ht = 2;
                                 } else {
                                     $ht = null;
@@ -109,16 +111,18 @@ class SyncLeagueJob implements ShouldQueue
                             } else {
                                 $ht = null;
                             }
-                                
-                            Competitor::updateOrCreate([
-                                "game_id" => $match->id,
-                                "code" => $option_type->fixedParamText,
-                                "bet_type_id" => $bet_type->id,
-                                "HT" => $ht
-                            ],[
-                                "data" => $option_type->results,
-                                "provider" => "tipico"
-                            ]);                    
+
+                            foreach ($option_type as $key => $option) {
+                                Competitor::updateOrCreate([
+                                    "game_id" => $match->id,
+                                    "code" => $option->fixedParamText,
+                                    "bet_type_id" => $bet_type->id,
+                                    "HT" => $ht
+                                ],[
+                                    "data" => $option->results,
+                                    "provider" => "tipico"
+                                ]); 
+                            }                                             
                         }
                     }
                 }
