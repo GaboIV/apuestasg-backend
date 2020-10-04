@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Competitor;
-use App\Http\Controllers\ApiController;
-use App\Inscription;
-use App\League;
-use App\Selection;
 use App\Team;
+use App\League;
 use App\Ticket;
+use App\Selection;
+use App\Competitor;
+use App\Inscription;
 use App\Transaction;
+use App\Helpers\Functions;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApiController;
 
 class TicketController extends ApiController
 {
@@ -26,13 +27,15 @@ class TicketController extends ApiController
 	    $user = Auth::user();
         $player = $user->player;
 
-        $ticketes = $player->tickets;
+        $ticketes = Ticket::where('player_id', $user->player->id)->orderBy('id', 'desc')->paginate();
+
+        // $ticketes = $player->tickets;
 
         foreach ($ticketes as $tik) {
         	foreach ($tik['selections'] as $sel) {
         		if ($sel->category_id == 7) {
 	        		$sel->inscription;
-	        		$sel->career;
+	        		$sel->career->racecourse;
 	        	}
         	}       	
         }
@@ -69,7 +72,7 @@ class TicketController extends ApiController
 				        	$league = League::whereId($sel->game->league_id)->first();
 
 				        	$ticketes[0]['selecciones'][$i]['id'] = $sel->id;
-	                        $ticketes[0]['selecciones'][$i]['dividendo'] = $sel->value;
+	                        
 	                        $ticketes[0]['selecciones'][$i]['liga'] = $league->name;
 
 	                        $id_select = $sel->select_id;
@@ -84,25 +87,44 @@ class TicketController extends ApiController
 	                        if ($competitor) {
 	                        	$team_id = $competitor->team_id;
 
-	                            $odd_fracc = $competitor->odd;
+	                            // $odd_fracc = $competitor->odd;
 
-	                            $odd = explode("/", $odd_fracc);
+	                            // $odd = explode("/", $odd_fracc);
 
-	                            if (!isset($odd[1])) {
-	                                $odd[1] = 1;
-	                            }
+	                            // if (!isset($odd[1])) {
+	                            //     $odd[1] = 1;
+	                            // }
 
-	                            $decimal_odd = (intval($odd[0]) / intval($odd[1])) + 1;
-	                            $decim_tot = $decimal_odd * $decim_tot;
+	                            // $decimal_odd = (intval($odd[0]) / intval($odd[1])) + 1;
+	                            // $decim_tot = $decimal_odd * $decim_tot;
+
+	                            // $towin = $decim_tot * $monto;
+
+	                            $selection = Functions::objArraySearch($competitor->data, "caption", $sel->type);
+
+	                            $ticketes[0]['selecciones'][$i]['dividendo'] = $selection['quoteFloatValue'];
+
+	                            $decim_tot = $decim_tot * $selection['quoteFloatValue'];
 
 	                            $towin = $decim_tot * $monto;
 
-	                            $ticketes[0]['selecciones'][$i]['equipo'] = $competitor->team->name;
+	                            if ($competitor->bet_type_id == 1) {
+	                            	if ($sel->type == 1) {
+	                            		$ticketes[0]['selecciones'][$i]['equipo'] = $sel->game->teams[0]['name'] . " a ganar";
+	                            	} elseif ($sel->type == 2) {
+	                            		$ticketes[0]['selecciones'][$i]['equipo'] = $sel->game->teams[1]['name'] . " a ganar";
+	                            	} else {
+	                            		$ticketes[0]['selecciones'][$i]['equipo'] = "Empate";
+	                            	}
+	                            } else {
+	                            	$ticketes[0]['selecciones'][$i]['equipo'] = $sel->type;
+	                            }
 
-	                            if (count($sel->game->competitors) == 2)
-				                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[1]['team']['name'];
-				                elseif (count($sel->game->competitors) == 3)
-				                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->competitors[0]['team']['name'] . " vs " . $sel->game->competitors[2]['team']['name'];
+	                            if (count($sel->game->teams) == 2) {
+				                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->teams[0]['name'] . " vs " . $sel->game->teams[1]['name'];
+	                            } elseif (count($sel->game->teams) == 3) {
+				                    $ticketes[0]['selecciones'][$i]['encuentro'] = $sel->game->teams[0]['name'] . " vs " . $sel->game->teams[1]['name'];
+	                            }
 	                        }
 				        }
 				        $i++;

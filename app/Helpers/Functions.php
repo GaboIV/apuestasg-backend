@@ -46,4 +46,15 @@ class Functions {
             $denominator
         ];
     }
+
+    public static function objArraySearch($array, $index, $value)
+    {
+        foreach ($array as $arrayInf) {
+            if (isset($arrayInf[$index]) && $arrayInf[$index] == $value) {
+                return $arrayInf;
+            }
+        }
+
+        return false;
+    }
 }

@@ -69,6 +69,8 @@ class SessionController extends ApiController {
                         $selection_name = $sel->game->teams[$selected_item['caption'] - 1]->name;
                     }
 
+                    $decim_tot = $decim_tot * $selections[$i]->value;
+
                     $selecciones[$i]['value'] = $selections[$i]->value; 
                     $selecciones[$i]['id'] = $selections[$i]->id;   
                     $selecciones[$i]['equipo'] = $selection_name;
@@ -298,7 +300,7 @@ class SessionController extends ApiController {
             $i = 0;
 
             foreach ($selections as $sel) {
-                if (($sel->career->date . " " . $sel->career->time) <= date("Y-m-d H:i:s")) {
+                if (($sel->career->posttime) <= date("Y-m-d H:i:s")) {
                     $sel->delete();
                 } else {
                     $oins = Inscription::whereId($sel->select_id)->first();
@@ -308,7 +310,7 @@ class SessionController extends ApiController {
                     $selecciones[$i]['horse'] = $oins->horse->name;
                     $selecciones[$i]['carrera'] = $sel->career->number;
                     $selecciones[$i]['hipodromo'] = $sel->career->racecourse->name;
-                    $selecciones[$i]['fecha_hora'] = $sel->career->date . " " . $sel->career->time;
+                    $selecciones[$i]['fecha_hora'] = $sel->career->posttime;
                 }
                 $i++; 
             }            

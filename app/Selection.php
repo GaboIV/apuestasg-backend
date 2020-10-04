@@ -43,8 +43,12 @@ class Selection extends Model {
             $competitors = $this->game->competitors;
         
             foreach ($competitors as $com) {
-                if ($this->select_id == $com->id) {
-                    $name_selection = $com->team->name;
+                if ($this->type == 1) {
+                    $name_selection = $this->game->teams[0]->name;
+                } elseif ($this->type == 2) {
+                    $name_selection = $this->game->teams[1]->name;
+                } else {
+                    $name_selection = "Empate";
                 }
             } 
         }
@@ -58,14 +62,14 @@ class Selection extends Model {
         if ($this->category_id != 7) {
             $competitors = $this->game->competitors;
         
-            foreach ($competitors as $com) {
-                if ($this->select_id == $com->id) {
-                    $status_selection = $com->status;
-                }
-            } 
+            // foreach ($competitors as $com) {
+            //     if ($this->select_id == $com->id) {
+            //         $status_selection = $com->status;
+            //     }
+            // } 
         }
               
 
-        return $status_selection;
+        return 0;
     }
 }
