@@ -57,4 +57,14 @@ class Functions {
 
         return false;
     }
+
+    public static function parseFraction (string $fraction)
+    {
+        if(preg_match('#(\d+)\s+(\d+)/(\d+)#', $fraction, $m)) {
+            return ($m[1] + $m[2] / $m[3]);
+        } else if( preg_match('#(\d+)/(\d+)#', $fraction, $m) ) {
+            return ($m[1] / $m[2]);
+        }
+        return (float) $fraction;
+    }
 }

@@ -8,6 +8,14 @@ class Racecourse extends Model
 {
     protected $appends = ['image'];
 
+    protected $fillable = [
+        "name",
+        "location",
+        "acro",
+        "origin",
+        "url"
+    ];
+
     public function careers() {
         return $this->hasMany('App\Career');
     }

@@ -1,103 +1,53 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Horses;
+namespace App\Jobs;
 
+use App\Game;
+use App\Team;
 use App\Horse;
 use App\Career;
 use App\Jockey;
-use App\Country;
+use App\BetType;
 use App\Trainer;
-use App\Racecourse;
+use App\Competitor;
 use App\Inscription;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\ApiController;
-use App\Jobs\SyncCareersJob;
+use App\Helpers\Functions;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 
-class RacecourseController extends ApiController{
-    public function index() {
-        $racecourses = Racecourse::orderBy('name', 'asc')
-                    ->get();
+class SyncCareersJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable;
+    public $racecourse;
 
-        return $this->successResponse([
-            'status' => 'correcto',
-            'hipodromos' => $racecourses,
-            'time' => date("Y-m-d H:i:s")
-        ], 200);
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct($racecourse)
+    {
+        $this->racecourse = $racecourse; 
     }
 
-    public function store(Request $request) {
-        
-    }
-
-    public function show($id) {
-        //
-    }
-
-    public function update(Request $request, $id) {
-        //
-    }
-
-    public function destroy($id) {
-        //
-    }
-
-    public function syncRacecoursesByDate() {
-        $client = new \GuzzleHttp\Client(['verify' => false, 'headers' => [
-            'Content-Type' => 'text/plain'
-        ]]);
-
-        $date = request()->date;
-
-        if (! $date) {
-            return $this->errorResponse("Debe enviar una fecha de sincronización", 422);
-        }
-
-        $sync_date = date('m-d-Y');
-
-        $url = 'https://www.drf.com/results/raceTracks/page/entries/date/' . $sync_date;
-
-        $data = json_decode($client->request('GET', $url)->getBody()) ?? null; 
-        
-        $tracks = array_merge($data->raceTracks->topTracks, $data->raceTracks->allTracks);
-        
-        foreach ($tracks as $key => $rc) {
-
-            $racecourse = Racecourse::whereAcro($rc->trackId)->with('country')->first();
-
-            if (! $racecourse) {
-                $country = Country::where('acro_3', $rc->country)->first();
-
-                if ($country) {
-                    $racecourse = Racecourse::create([
-                        "name" => $rc->trackName,
-                        "location" => $country->id,
-                        "acro" => $rc->trackId,
-                        "origin" => "DRF",
-                        "url" => null
-                    ]);
-
-                    $racecourse->load('country');
-                }
-            }
-
-            if ($racecourse) {
-                $this->dispatch(new SyncCareersJob($racecourse));
-            }
-        }
-
-        return $this->successResponse($data, 200);
-    }
-
-    public function syncCareers ($id, $date) {
-        ini_set('max_execution_time', 600);
-
-        $racecourse = Racecourse::find($id);
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        $racecourse = $this->racecourse;
 
         if (isset($racecourse)) {
             $client = new \GuzzleHttp\Client(['verify' => false, 'headers' => [
                 'Content-Type' => 'text/plain'
             ]]);
+
+            $date = date("m-d-Y");
 
             $date_2 = explode("-", $date);
 
@@ -105,29 +55,24 @@ class RacecourseController extends ApiController{
 
             $url_2 = 'https://xpbapi.drf.com/races/'. $date_2['2'] . "-" . $date_2['0'] . "-" . $date_2['1'] . '/track/' . $racecourse->acro;
 
-            // dd($url_2);
-
             $tracks_1 = json_decode($client->request('GET', $url_1)->getBody());    
 
             $tracks_2 = json_decode($client->request('GET', $url_2)->getBody()); 
 
+            \Log::info([$url_1, $url_2]);
+
             foreach ($tracks_1->races as $key_trk => $trk) {
-
-                // $country = Country::where('acro_2', $trk->Country)->OrWhere('acro_3', $trk->Country)->first(); 
-
-                // dd($trk);
-
                 if ($trk->distanceUnit == ''){
                     $data_trk = explode("|", $trk->raceTypeDescription);
 
                     if (strpos(strtolower($data_trk[0]), "f") != false){
                         $trk->distanceUnit = "F";
                         $distance_explode = explode("f", trim($data_trk[0]));
-                        $trk->distanceValue = $this->parseFraction($distance_explode[0]);
+                        $trk->distanceValue = Functions::parseFraction($distance_explode[0]);
                     } elseif (strpos(strtolower($data_trk[0]), "m") != false){
                         $trk->distanceUnit = "M";
                         $distance_explode = explode("m", trim($data_trk[0]));
-                        $trk->distanceValue = $this->parseFraction($distance_explode[0]);
+                        $trk->distanceValue = Functions::parseFraction($distance_explode[0]);
                     } else {
                         $trk->distanceUnit = "MT";
                         $trk->distanceValue = trim($data_trk[0]);
@@ -177,8 +122,6 @@ class RacecourseController extends ApiController{
                     "sex_restriction" => $trk->sexRestrictionDescription ?? null,
                     "record" => null
                 ]);
-
-                // dd($tracks_2->tracks[$key_trk]->runners);
 
                 if (isset($tracks_2->tracks[$key_trk]->runners)) {
                     $runners = $tracks_2->tracks[$key_trk]->runners;
@@ -296,130 +239,9 @@ class RacecourseController extends ApiController{
                 }  
             }            
 
-            return $this->successResponse("Se sincronizaron " . count($tracks_1->races). " carreras.", 200);
+            return true;
         } else {
-            $this->errorResponse("Hipodromo sin link de actualización", 406);
+            return false;
         }
     }
-
-    public function parseFraction(string $fraction): float 
-    {
-        if(preg_match('#(\d+)\s+(\d+)/(\d+)#', $fraction, $m)) {
-            return ($m[1] + $m[2] / $m[3]);
-        } else if( preg_match('#(\d+)/(\d+)#', $fraction, $m) ) {
-            return ($m[1] / $m[2]);
-        }
-        return (float) $fraction;
-    }
-
-    // public function syncCareers ($id) {
-    //     ini_set('max_execution_time', 600);
-
-    //     $racecourse = Racecourse::find($id);
-
-    //     if (isset($racecourse->url)) {
-    //         $client = new \GuzzleHttp\Client(['verify' => false, 'headers' => [
-    //             'Content-Type' => 'text/plain'
-    //         ]]);
-
-    //         $tracks = json_decode($client->request('POST', "https://xpbapi.drf.com/races", 
-    //         [ 
-    //             "body" => '[{"raceKey":"GP2020-05-215","raceDate":"2020-05-21","raceNumber":6,"trackCode":"GP"}]'])->getBody());    
-                
-    //         dd($tracks);
-
-    //         foreach ($tracks->AllRaces as $trk) {
-
-    //             $country = Country::where('acro_2', $trk->Country)->OrWhere('acro_3', $trk->Country)->first();  
-
-    //             if ($trk->DistanceUnit == "F") {
-    //                 $distance = ($trk->Distance / 100) * 201;
-    //             } elseif ($trk->DistanceUnit == "Y") {
-    //                 $distance = ($trk->Distance / 1.094);
-    //             } elseif ($trk->DistanceUnit == "M") {
-    //                 $distance = $trk->Distance;
-    //             }
-
-    //             if ($trk->Surface == "T") {
-    //                 $surface = "Grama";
-    //             } elseif ($trk->Surface == "D") {
-    //                 $surface = "Arena";
-    //             }
-
-    //             $career = Career::updateOrCreate([
-    //                 "racecourse_id" => $racecourse->id,
-    //                 "date" => date("Y-m-d", strtotime($trk->PostTime)),
-    //                 "number" => $trk->RaceNumber
-    //             ],
-    //             [
-    //                 "name" => $trk->RaceName,
-    //                 "title" => $trk->RaceConditions,
-    //                 "posttime" => date("Y-m-d H:i:s", strtotime($trk->PostTime)),
-    //                 "distance" => $distance,
-    //                 "surface" => $surface ?? null,
-    //                 "status" => 1,
-    //                 "grade" => $trk->Grade,
-    //                 "purse" => $trk->Purse,
-    //                 "age_restriction" => $trk->AgeRestriction,
-    //                 "sex_restriction" => $trk->SexRestriction,
-    //                 "record" => $trk->TrackRecord
-    //             ]);
-
-    //             foreach ($trk->Entries as $ins) { 
-                    
-    //                 if ($ins->JockeyName) {
-    //                     $jockey = Jockey::firstOrCreate(
-    //                         [ "name" =>  $ins->JockeyName],
-    //                         [ "name_id" => $ins->JockeyName, "country_id" => $country->id ]
-    //                     );
-    //                 }
-
-    //                 if ($ins->TrainerName) {                    
-    //                     $trainer = Trainer::firstOrCreate(  
-    //                         [ "name" =>  $ins->TrainerName],
-    //                         [ "name_id" => $ins->TrainerName, "country_id" => $country->id ]                    
-    //                     );
-    //                 }
-
-    //                 if ($ins->SexDescription == 'Horse' || $ins->SexDescription == 'Gelding' || $ins->SexDescription == 'Colt') {
-    //                     $sexHorse = "M";
-    //                 } elseif ($ins->SexDescription == 'Mare' || $ins->SexDescription == 'Filly' || $ins->SexDescription == 'Female') {
-    //                     $sexHorse = "M";
-    //                 }
-                    
-    //                 $horse = Horse::updateOrCreate(
-    //                     [
-    //                         "name" => $ins->HorseName
-    //                     ],
-    //                     [
-    //                         "sex" => $sexHorse ?? null,
-    //                         "color" => $ins->Color ?? null,
-    //                         "birthday" => $ins->YearOfBirth . "-01-01"
-    //                     ]
-    //                 );
-        
-    //                 Inscription::updateOrCreate(
-    //                     [
-    //                         "career_id" => $career->id,
-    //                         "number" => $ins->ProgramNumber
-    //                     ],
-    //                     [
-    //                         "horse_id" => $horse->id,
-    //                         "jockey_id" => $jockey->id,
-    //                         'trainer_id' => $trainer->id,
-    //                         'position' => $ins->PostPosition,
-    //                         'odd' => $ins->MorningLineOdds,
-    //                         'weight' => (round(($ins->JockeyWeight / 2.205) * 2) / 2),
-    //                         'medicines' => $ins->Medication,
-    //                         'implements' => $ins->Equipment
-    //                     ]
-    //                 );
-    //             }  
-    //         }            
-
-    //         return $this->successResponse($tracks->AllRaces, 200);
-    //     } else {
-    //         $this->errorResponse("Hipodromo sin link de actualización", 406);
-    //     }
-    // }
 }

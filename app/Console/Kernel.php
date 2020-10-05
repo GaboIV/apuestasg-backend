@@ -28,6 +28,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('telescope:prune')->dailyAt('00:00');
 
         $schedule->command('sync:leagues')->hourly();
+
+        $schedule->command('sync:careers')->dailyAt('03:30');
+
+        $schedule->command('sync:careers')->dailyAt('12:30');
     }
 
     /**
