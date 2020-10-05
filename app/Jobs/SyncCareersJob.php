@@ -22,15 +22,17 @@ class SyncCareersJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
     public $racecourse;
+    public $date;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($racecourse)
+    public function __construct($racecourse, $date)
     {
         $this->racecourse = $racecourse; 
+        $this->date = $date;
     }
 
     /**
@@ -47,7 +49,7 @@ class SyncCareersJob implements ShouldQueue
                 'Content-Type' => 'text/plain'
             ]]);
 
-            $date = date("m-d-Y");
+            $date = $this->date;
 
             $date_2 = explode("-", $date);
 

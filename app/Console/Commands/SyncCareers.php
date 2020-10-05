@@ -76,7 +76,7 @@ class SyncCareers extends Command
             }
 
             if ($racecourse) {
-                SyncCareersJob::dispatch($racecourse);
+                SyncCareersJob::dispatch($racecourse, date('m-d-Y'));
             }
         }
     }

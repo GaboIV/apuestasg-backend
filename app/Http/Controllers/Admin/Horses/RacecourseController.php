@@ -53,7 +53,7 @@ class RacecourseController extends ApiController{
             return $this->errorResponse("Debe enviar una fecha de sincronización", 422);
         }
 
-        $sync_date = date('m-d-Y');
+        $sync_date = $date;
 
         $url = 'https://www.drf.com/results/raceTracks/page/entries/date/' . $sync_date;
 
@@ -82,7 +82,7 @@ class RacecourseController extends ApiController{
             }
 
             if ($racecourse) {
-                $this->dispatch(new SyncCareersJob($racecourse));
+                $this->dispatch(new SyncCareersJob($racecourse, $sync_date));
             }
         }
 

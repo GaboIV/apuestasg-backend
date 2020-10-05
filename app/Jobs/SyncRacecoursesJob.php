@@ -69,7 +69,7 @@ class SyncRacecoursesJob implements ShouldQueue
             }
 
             if ($racecourse) {
-                $this->dispatch(new SyncCareersJob($racecourse));
+                $this->dispatch(new SyncCareersJob($racecourse, date('m-d-Y')));
             }
         }
     }
