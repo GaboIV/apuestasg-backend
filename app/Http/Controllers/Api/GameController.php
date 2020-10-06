@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\BetType;
-use App\Competitor;
 use App\Game;
-use App\Http\Controllers\ApiController;
+use App\Team;
 use App\League;
-use App\Pitcher;
+use App\Ticket;
 use App\Player;
 use App\Result;
+use App\Pitcher;
+use App\BetType;
 use App\Selection;
-use App\Team;
-use App\Ticket;
+use App\Competitor;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ApiController;
 
 class GameController extends ApiController
 {

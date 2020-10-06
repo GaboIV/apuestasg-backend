@@ -163,8 +163,7 @@ class SessionController extends ApiController {
                     $status = "success";
                     $mstatus = "Selección agregada";
                 } 
-            }
-                          
+            }                          
         }
 
         if ($tipo != '7') {

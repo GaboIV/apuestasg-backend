@@ -75,6 +75,8 @@ class TicketController extends ApiController
 	                        
 	                        $ticketes[0]['selecciones'][$i]['liga'] = $league->name;
 
+	                        $ticketes[0]['selecciones'][$i]['start'] = $sel->game->start;
+
 	                        $id_select = $sel->select_id;
 
 	                        foreach ($sel->game->competitors as $comp) {
@@ -102,7 +104,7 @@ class TicketController extends ApiController
 
 	                            $selection = Functions::objArraySearch($competitor->data, "caption", $sel->type);
 
-	                            $ticketes[0]['selecciones'][$i]['dividendo'] = $selection['quoteFloatValue'];
+	                            $ticketes[0]['selecciones'][$i]['dividendo'] = number_format($selection['quoteFloatValue'], 2, ',', '.');
 
 	                            $decim_tot = $decim_tot * $selection['quoteFloatValue'];
 
@@ -158,7 +160,7 @@ class TicketController extends ApiController
 				if ($ticket_id) {
 					$ticketes[0]['id_usuario'] = $player->id;
 					$ticketes[0]['cod_seguridad'] = $cod_serial;
-					$ticketes[0]['correlativo'] = $ticket_id;
+					$ticketes[0]['correlativo'] = str_pad($ticket_id, 10, "0", STR_PAD_LEFT);
 					$ticketes[0]['fecha_hora'] = $fecha;
 					$ticketes[0]['monto'] = $monto;
 					$ticketes[0]['cuota'] = $decim_tot;
@@ -267,7 +269,7 @@ class TicketController extends ApiController
 								$ticketes[0]['id_usuario'] = $player->id;
 								$ticketes[0]['cod_seguridad'] = $cod_serial;
 								$ticketes[0]['fecha_hora'] = $fecha;
-								$ticketes[0]['monto'] = $monto_a;
+								$ticketes[0]['monto'] = number_format($monto_a, 2, ',', '.');
 								$ticketes[0]['a_ganar'] = 'Según dividendo';
 								$ticketes[0]['id_seleccion'] = $sel['select_id'];
 
