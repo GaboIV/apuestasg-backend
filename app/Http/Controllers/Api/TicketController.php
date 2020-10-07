@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
+use App\Jobs\SendTicketMailJob;
 
 class TicketController extends ApiController
 {
@@ -296,14 +297,17 @@ class TicketController extends ApiController
                     } else {
                     	break;
                     }		        
-	            }
+				}
+
 	            $response = array(
                     "status" => "success",
                     "ticketes" => $ticketes,
                     "disponible" => $disponible ?? 0,
                     "montos" => $monto,
                     "mstatus" => "Ticket generado correctamente"
-                );
+				);
+				
+				$this->dispatch(new SendTicketMailJob($player, $ticketes));
        		}            
        	} else {
        		$response = [
