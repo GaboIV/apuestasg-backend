@@ -8,8 +8,7 @@ class Result extends Model
 {
     protected $fillable = [
         'result',
-        'category_id',
-        'bet_type_id',
+        'competitor_id',
         'game_id'
     ];
 }

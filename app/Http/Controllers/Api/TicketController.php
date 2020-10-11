@@ -30,7 +30,8 @@ class TicketController extends ApiController
 	    $user = Auth::user();
         $player = $user->player;
 
-        $ticketes = Ticket::where('player_id', $user->player->id)->orderBy('id', 'desc')->paginate();
+        $ticketes = Ticket::where('player_id', $user->player->id)
+        ->orderBy('id', 'desc')->paginate();
 
         // $ticketes = $player->tickets;
 
@@ -39,6 +40,9 @@ class TicketController extends ApiController
         		if ($sel->category_id == 7) {
 	        		$sel->inscription;
 	        		$sel->career->racecourse;
+	        		unset($tik['competitor']);
+	        	} else {
+	        		$sel->competitor;
 	        	}
         	}       	
         }

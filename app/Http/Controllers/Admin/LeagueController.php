@@ -77,35 +77,37 @@ class LeagueController extends ApiController
                             "teams_id" => (array) $teams_id,
                         ]);
         
-                        foreach ($data->matchOddGroups->{$game->id} as $key => $option_type) {
+                        if (is_null($match->result)) {
+                            foreach ($data->matchOddGroups->{$game->id} as $key => $option_type) {
 
-                            $bet_type = BetType::whereName($key)->first();
-        
-                            $ht = null;
-        
-                            if (strpos($bet_type->name, 'section-') !== false) {
-                                if (strpos($key, '1.') !== false) {
-                                    $ht = 1;
-                                } elseif (strpos($key, '2.') !== false) {
-                                    $ht = 2;
+                                $bet_type = BetType::whereName($key)->first();
+            
+                                $ht = null;
+            
+                                if (strpos($bet_type->name, 'section-') !== false) {
+                                    if (strpos($key, '1.') !== false) {
+                                        $ht = 1;
+                                    } elseif (strpos($key, '2.') !== false) {
+                                        $ht = 2;
+                                    } else {
+                                        $ht = null;
+                                    }
                                 } else {
                                     $ht = null;
                                 }
-                            } else {
-                                $ht = null;
-                            }
 
-                            foreach ($option_type as $key => $option) {
-                                Competitor::updateOrCreate([
-                                    "game_id" => $match->id,
-                                    "code" => $option->fixedParamText,
-                                    "bet_type_id" => $bet_type->id,
-                                    "HT" => $ht
-                                ],[
-                                    "data" => $option->results,
-                                    "provider" => "tipico"
-                                ]); 
-                            }                                             
+                                foreach ($option_type as $key => $option) {
+                                    Competitor::updateOrCreate([
+                                        "game_id" => $match->id,
+                                        "code" => $option->fixedParamText,
+                                        "bet_type_id" => $bet_type->id,
+                                        "HT" => $ht
+                                    ],[
+                                        "data" => $option->results,
+                                        "provider" => "tipico"
+                                    ]); 
+                                }                                             
+                            }
                         }
                     }
                 }

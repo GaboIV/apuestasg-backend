@@ -35,6 +35,10 @@ class Selection extends Model {
         return $this->belongsTo(Inscription::class, 'select_id', 'id');
     }
 
+    public function competitor() {
+        return $this->belongsTo(Competitor::class, 'select_id', 'id');
+    }
+
     public function getTeamNameAttribute() { 
 
         $name_selection = null;

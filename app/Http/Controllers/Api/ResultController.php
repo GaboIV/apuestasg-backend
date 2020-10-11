@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Career;
-use App\Competitor;
 use App\Game;
-use App\Http\Controllers\ApiController;
-use App\Inscription;
+use App\Career;
 use App\Player;
+use App\Ticket;
 use App\Result;
 use App\Selection;
-use App\Ticket;
+use App\Competitor;
+use App\Inscription;
 use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\Eloquent\Builder;
 
 class ResultController extends ApiController {
 
@@ -49,14 +50,14 @@ class ResultController extends ApiController {
 
         foreach ($games as $game) {
             if ($game->status == 3) {
-                $result = Result::whereGameId($game->id)->first();
+                // $result = Result::whereGameId($game->id)->first();
 
-                $res = explode('!', $result['result']);
+                // $res = explode('!', $result['result']);
 
-                if (count($res) == 2) {
-                    $game->competitors[0]['result'] = $res[0];
-                    $game->competitors[1]['result'] = $res[1];
-                }
+                // if (count($res) == 2) {
+                //     $game->competitors[0]['result'] = $res[0];
+                //     $game->competitors[1]['result'] = $res[1];
+                // }
             }
         }
 
@@ -131,7 +132,8 @@ class ResultController extends ApiController {
         ], 200);
     }
 
-    public function resultCharge(Request $request) {
+    public function resultChargeOld(Request $request) 
+    {
         $data = $request->all();
         $disponible = null;
 
@@ -263,6 +265,163 @@ class ResultController extends ApiController {
             return $this->successResponse([
                 "status" => "error",
                 "mensaje" => "Ya existente"
+            ], 200);
+        }
+
+        return $this->successResponse([
+            "status" => "correcto"
+        ], 200);
+    }
+
+    public function resultCharge(Request $request) 
+    {
+        $data = $request->all();
+        $disponible = null;
+
+        $result_exist = Game::whereId($data['game_id'])->first()->result;
+
+        if (!$result_exist) {
+            foreach ($data['data'] as $key => $opt) {
+                if ($key != 'result') {
+                    $result = Competitor::whereId($key)->update([
+                        "winner" => $opt
+                    ]);
+
+                    $tickets = Ticket::whereHas('selections', function ($query) use ($key, $opt) {
+                        $query->Where('select_id', $key)
+                        ->where('category_id', '!=', '7');
+                    })
+                    ->with('selections')
+                    ->whereStatus(0)
+                    ->get();
+
+                    foreach ($tickets as $key => $ticket) {
+                        $pay = true;
+                        $odd_to_pay = 1;
+
+                        foreach ($ticket->selections as $key => $selection) {
+                            if (! $selection->competitor->winner) {
+                                $pay = false;
+                            } else {
+                                if ($selection->competitor->winner == $selection->type) {
+                                    \Log::info("Odd_to_pay anterior: " . $odd_to_pay);
+
+                                    $odd_to_pay = $odd_to_pay * floatval($selection->value);
+
+                                    \Log::info("Odd_to_pay multiplicador: " . floatval($selection->value));
+
+                                    \Log::info("Odd_to_pay resultado: " . $odd_to_pay);
+
+                                } elseif ($selection->competitor->winner != $selection->type) {
+                                    $pay = false;
+                                    $ticket->update(["status" => 3]);
+                                }
+                            }
+                        }
+
+                        if ($pay) {
+                            $player_id =  $ticket['player_id'];
+                            $amount_to_pay = $ticket['amount'] * $odd_to_pay;
+
+                            $player = Player::whereId($player_id)->first();
+
+                            $ticket->update([
+                                "status" => 1
+                            ]);
+
+                            $balance = $player['available'];
+
+                            $new_balance =  $balance + $amount_to_pay;
+
+                            $player->update(['available' => $new_balance]);
+
+                            $transaction = Transaction::create([
+                                "event_type_id" => 3,
+                                "player_id" => $player->id,
+                                "ticket_id" => $ticket->code,
+                                "amount" => $amount_to_pay,
+                                "player_balance" => $new_balance
+                            ]);                           
+                        }
+                    }
+
+                    // $selections = Selection::whereSample($data['game_id'])
+                    // ->where('category_id', '!=', 7)
+                    // ->whereSelectId($key)
+                    // ->where('ticket_id', '!=', null)->get();
+
+                    // if (count($selections) > 0) {
+                    //     foreach ($selections as $sel) {
+                    //         $codigo = $sel['ticket_id'];
+                    //         $disponible = 0.0001;
+                    //         $acumulado = 1;
+
+                    //         $selections_ticket = Selection::whereTicketId($codigo)->with('competitor')->get();
+
+                    //         $full = 'true';
+
+                    //         foreach ($selections_ticket as $tik) {
+                    //             $id_p = $tik['select_id'];
+
+                    //             $competitor = $tik['competitor'];
+
+                    //             if ($competitor['winner'] == $tik['type']) { 
+                    //                 $acumulado = $acumulado * $sel['value']; 
+                    //             } elseif ($competitor['winner'] == 'Desc.') {
+
+                    //             } elseif (is_null($competitor['winner'])) { 
+                    //                 $full = 'pendiente'; 
+                    //             } elseif (! is_null($competitor['winner']) && $competitor['winner'] != $tik['type']) { 
+                    //                 $full = 'false';
+
+                    //                 $parleys = Ticket::whereId($codigo)->update(array('status' => 3));
+                    //             } 
+                    //         }
+
+                    //         if ($full == 'true') {
+                    //             $prly = Ticket::whereId($codigo)->first();
+
+                    //             \Log::info("Ticket a pagar: " . $prly->id);
+
+                    //             \Log::info("Acumulado: " . $acumulado);
+
+                    //             Ticket::whereId($codigo)->update(array('status' => 1));
+
+                    //             if ($prly) {
+                    //                 $id_player =  $prly['player_id'];
+                    //                 $monto_pagar = $prly['amount'] * $acumulado;
+
+                    //                 $player = Player::whereId($id_player)->first();
+
+                    //                 $saldo = $player['available'];
+
+                    //                 $nuevo_saldo =  $saldo + $monto_pagar;
+
+                    //                 \Log::info("Total a pagar: " . $monto_pagar);
+
+                    //                 $player->update(['available' => $nuevo_saldo]);
+
+                    //                 $disponible = floatval($nuevo_saldo);
+
+                    //                 $transaction = Transaction::create([
+                    //                     "event_type_id" => 3,
+                    //                     "player_id" => $player->id,
+                    //                     "ticket_id" => $prly->code,
+                    //                     "amount" => $monto_pagar,
+                    //                     "player_balance" => $nuevo_saldo
+                    //                 ]);
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                }
+            }
+
+            Game::whereId($data['game_id'])->update(['status' => 3, 'result' => $data['data']['result']]);
+        } else {
+            return $this->successResponse([
+                "status" => "error",
+                "mensaje" => "Resultado existente"
             ], 200);
         }
 

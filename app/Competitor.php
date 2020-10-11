@@ -17,7 +17,8 @@ class Competitor extends Model {
         'status',
         'data',
         'HT',
-        'provider'
+        'provider',
+        'winner'
     ];
 
     protected $casts = [
