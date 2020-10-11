@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Team;
+use App\Assist;
 use App\League;
 use App\Ticket;
 use App\Selection;
@@ -13,8 +14,9 @@ use App\Helpers\Functions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendSportTicketMailJob;
+use App\Jobs\SendHipismTicketMailJob;
 use App\Http\Controllers\ApiController;
-use App\Jobs\SendTicketMailJob;
 
 class TicketController extends ApiController
 {
@@ -179,14 +181,29 @@ class TicketController extends ApiController
 					]);
 
 					$player->available = $nuevo_d;
+
 					if ($player->update()) {
 						$disponible = $nuevo_d;
+
                         $response = array(
                             "status" => "success",
                             "ticketes" => $ticketes,
                             "disponible" => $disponible,
                             "mstatus" => "Ticket generado correctamente"
                         );
+
+                        $player->email = $user->email;
+
+                        $assist = Assist::create([
+				            "status" => 1,
+				            "email_sent_player" => $user['email'],
+				            "email_sent_admin" => null,
+				            "admin_id" => null,
+				            "player_id" => $player->id,
+				            "type" => "ticket-sport"
+				        ]);
+						
+						$this->dispatch(new SendSportTicketMailJob($player, $ticketes, $assist));
 					}               
 				}
        		} else {
@@ -306,8 +323,19 @@ class TicketController extends ApiController
                     "montos" => $monto,
                     "mstatus" => "Ticket generado correctamente"
 				);
+
+				$player->email = $user->email;
+
+				$assist = Assist::create([
+		            "status" => 1,
+		            "email_sent_player" => $user['email'],
+		            "email_sent_admin" => null,
+		            "admin_id" => null,
+		            "player_id" => $player->id,
+		            "type" => "ticket-hipism"
+		        ]);
 				
-				$this->dispatch(new SendTicketMailJob($player, $ticketes));
+				$this->dispatch(new SendHipismTicketMailJob($player, $ticketes, $assist));
        		}            
        	} else {
        		$response = [

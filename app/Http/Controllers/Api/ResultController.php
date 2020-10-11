@@ -20,9 +20,7 @@ class ResultController extends ApiController {
     public function byFilters(Request $request) {
         $data = $request->all();
 
-        $query = Game::with('league.category')->with(['competitors' => function($queryA) {
-            $queryA->where('team_id', '!=', 1);
-        }]);
+        $query = Game::with('league.category', 'league.match_structure')->with('competitors');
 
         if (isset($data['category_id']) || isset($data['country_id'])) {
             $query->whereHas('league', function ($queryL) use ($data) {
@@ -39,10 +37,9 @@ class ResultController extends ApiController {
         }
 
         if (isset($data['name']) && $data['name'] != '' && $data['name'] != 'todos' && $data['name'] != 'todas') {
-            $query->whereHas('competitors', function ($queryC) use ($data) {
-                $queryC->whereHas('team', function ($queryT) use ($data) {
-                    $queryT->where('name', 'like', '%' . $data['name'] . '%');
-                });
+            $query->whereHas('teams', function ($queryC) use ($data) {
+                $queryC->Where('name', 'LIKE', "%" . $data['name'] . "%");
+                $queryC->orWhere('name_id', 'LIKE', "%" . $data['name'] . "%");
             });
         }
 

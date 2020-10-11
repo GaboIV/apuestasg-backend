@@ -37,6 +37,10 @@ class League extends Model
         return $this->hasOne(Category::class, 'id', 'category_id');
     }
 
+    public function match_structure() {
+        return $this->hasOne(MatchStructure::class, 'id', 'match_structure_id');
+    }
+
     public function country() {
         return $this->hasOne(Country::class, 'id', 'country_id');
     }

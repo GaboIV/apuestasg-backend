@@ -113,7 +113,7 @@ class RegisterController extends ApiController
             "email_sent_player" => $user['email'],
             "email_sent_admin" => $admin_email,
             "admin_id" => null,
-            "player_id" => $user['email'],
+            "player_id" => $player->id,
             "type" => "register"
         ]);
     

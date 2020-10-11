@@ -45,6 +45,22 @@
 	    font-size: 1.3em;
 	}
 
+	.ttl_tk {
+		text-align: center;
+	}
+
+	.text_encuentro {
+		display: inline-block;
+	}
+
+	.equipo_sel_tk {
+		font-weight: bold;
+	}
+
+	.encuentro_sel_tk {
+		font-size: 0.9em;
+	}
+
 	.hr_r1 {
 	    font-size: 1em;
 	}
@@ -72,6 +88,16 @@
 	    height: 4px;
 	    padding: 4px;
 	    margin-bottom: 8px;
+	}
+
+	.separador2_tk {
+	    border-top: solid 1px #CFCFCF;
+	}
+
+	.cada_sel_tk {
+	    border-bottom: dotted 1px #CFCFCF;
+	    width: 97%;
+	    padding: 5px 0;
 	}
 
 	.footer {
@@ -108,39 +134,48 @@
 								<?php foreach ($ticketes as $key => $ticket): ?>
 									<tr>
 										<td >
-											<div class='tk_generado' *ngFor="let tk of _inicioSesion.ticketes">
+							                <div class="tk_generado" *ngFor="let tk2 of _inicioSesion.ticketes2">
 							                    <div style="text-align: center;">
 							                        <img src="https://i.imgur.com/UMoqKqu.png" height="34px">
 							                        <br>
 							                    </div>
-							                    <div class="ttlhr">
-							                        <div class="ttl_hr">Carr. <?php echo $ticket['selecciones']['inscripcion']['carrera']['number'] ?></div>
-							                        <div class="ttl2_hr">
-							                            <div style="font-size: 0.8em;"><?php echo date("d-m-Y g:i:s a", strtotime($ticket['selecciones']['inscripcion']['carrera']['posttime'])); ?></div>
-							                            <div class='ttl_hipo'><?php echo $ticket['selecciones']['inscripcion']['carrera']['racecourse']['name'] ?></div>
+							                    <div class="ttl_tk">Ticket de apuesta</div>
+							                    <div class="ttl_tk">Identificador: <?php echo strtoupper($ticket['cod_seguridad']) ?></div>
+							                    <div class="ttl_tk">Número de ticket: <?php echo strtoupper($ticket['correlativo']) ?></div>
+							                    <div class="ttl_tk">Fecha y hora: <?php echo date("d-m-Y g:i:s a", strtotime($ticket['fecha_hora'])); ?></div>
+							                    <div class="separador1_tk"></div>
+
+							                    <?php foreach ($ticket['selecciones'] as $key => $select): ?>
+							                    	<div class="cada_sel_tk" *ngFor="let sel of tk2.selecciones">
+								                        <div class="encuentro_sel_tk"><?php echo $select['liga']; ?>
+								                            <div style="float: right;"><?php echo date("d-m-Y", strtotime($select['start'])); ?></div>
+								                        </div>
+								                        <div class="encuentro_sel_tk">
+								                            <div class="text_encuentro"><?php echo $select['encuentro']; ?></div>
+								                            <div style="float: right; "><?php echo date("g:i:s a", strtotime($select['start'])); ?></div>
+								                        </div>
+								                        <div class="equipo_sel_tk"><?php echo $select['equipo']; ?>
+								                            <div style="float: right;  font-weight: bold;"><?php echo $select['dividendo'] ?></div>
+								                        </div>
+								                    </div>
+							                    <?php endforeach ?>							                    
+
+							                    <div class="separador2_tk"></div>
+							                    <div class="cada_sel_tk" style="padding: 10px 0;">
+							                        <div class="encuentro_sel_tk">Importe de Apuesta:
+							                            <div style="float: right;  font-weight: bold;">Bs. <?php echo  number_format($ticket['monto'], 2, ',', '.'); ?></div>
+							                        </div>
+							                        <div class="encuentro_sel_tk">Cuota Total:
+							                            <div style="float: right;  font-weight: bold;"><?php echo  number_format($ticket['cuota'], 2, ',', '.'); ?></div>
+							                        </div>
+							                        <div class="equipo_sel_tk">Ganancia Posible:
+							                            <div style="float: right;  font-weight: bold;">Bs. <?php echo  number_format($ticket['a_ganar'], 2, ',', '.'); ?></div>
 							                        </div>
 							                    </div>
-							                    <div class='separador1_tk'></div>
-							                    <div class="hr_r1">
-							                        <div style="text-align: left"><?php echo "Bs. " . $ticket['monto'] ?></div>
-							                        <div style="float: right; text-align: right;"><?php echo "Bs. " . $ticket['monto'] ?></div>
+							                    <div class="separador2_tk"></div>
+							                    <div class="cada_sel_tk">
+							                        <div class="encuentro_sel_tk" style="padding: 2px; text-align: center;"> *** GRACIAS POR PREFERIRNOS ***</div>
 							                    </div>
-							                    <div class="hr_r2">
-							                        <?php echo $ticket['selecciones']['inscripcion']['number'] . " - " . $ticket['selecciones']['inscripcion']['horse']['name'] ?>
-							                    </div>
-							                    <div class='separador1_tk'></div>
-							                    <table class="footer" cellspacing="0" cellpadding="0">
-							                    	<tr>
-							                    		<td style="text-align: left;">1 apuesta</td>
-							                    		<td style="text-align: center;">TOTAL</td>
-							                    		<td style="text-align: right;"><?php echo "Bs. " . $ticket['monto'] ?></td>
-							                    	</tr>
-							                    	<tr>
-							                    		<td style="text-align: left;"><?php echo strtoupper($ticket['cod_seguridad']) ?></td>
-							                    		<td style="text-align: center;"><?php echo date("d-m-Y", strtotime($ticket['fecha_hora'])); ?></td>
-							                    		<td style="text-align: right;"><?php echo date("g:i:s a", strtotime($ticket['fecha_hora'])); ?></td>
-							                    	</tr>
-							                    </table>
 							                </div>
 										</td>
 									</tr>

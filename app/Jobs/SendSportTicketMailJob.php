@@ -2,19 +2,20 @@
 
 namespace App\Jobs;
 
-use App\Mail\NotificationTicketHorseRacingPlayerMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Mail\NotificationTicketSportPlayerMail;
 
-class SendTicketMailJob implements ShouldQueue
+class SendSportTicketMailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
     protected $player;
     protected $ticketes;
+    protected $assist;
 
     /**
      * Create a new job instance.
@@ -23,10 +24,11 @@ class SendTicketMailJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($player, $ticketes)
+    public function __construct($player, $ticketes, $assist)
     {
         $this->player = $player->toArray();
         $this->ticketes = $ticketes;
+        $this->assist = $assist;
     }
 
     /**
@@ -37,6 +39,6 @@ class SendTicketMailJob implements ShouldQueue
     public function handle()
     {
         Mail::to($this->player['email'])
-            ->send(new NotificationTicketHorseRacingPlayerMail($this->player, $this->ticketes, "000000005"));       
+            ->send(new NotificationTicketSportPlayerMail($this->player, $this->ticketes, $this->assist->id));       
     }
 }
