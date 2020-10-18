@@ -72,14 +72,24 @@ class SyncLeagueJob implements ShouldQueue
                         $teams_id = [];
         
                         for ($i=1; isset($game->{"team" . $i}); $i++) { 
-                            $teams[$i] = Team::firstOrCreate([
-                                "name_id" => $game->{"team" . $i}
-                            ],[
-                                "web_id" => $game->{"team" . $i . "Id"},
-                                "name" => $game->{"team" . $i},
-                                "name_id" => $game->{"team" . $i}
-                            ]);
-        
+                            if ($game->{"team" . $i . "Id"} == 0) {
+                                $teams[$i] = Team::firstOrCreate([
+                                    "name_id" => $game->{"team" . $i}
+                                ],[
+                                    "web_id" => $game->{"team" . $i . "Id"},
+                                    "name" => $game->{"team" . $i},
+                                    "name_id" => $game->{"team" . $i}
+                                ]);
+                            } else {
+                                $teams[$i] = Team::firstOrCreate([
+                                    "web_id" => $game->{"team" . $i . "Id"},
+                                ],[
+                                    "web_id" => $game->{"team" . $i . "Id"},
+                                    "name" => $game->{"team" . $i},
+                                    "name_id" => $game->{"team" . $i}
+                                ]);
+                            }
+
                             $teams_id[] = $teams[$i]->id;
         
                             $teams[$i]->leagues()->syncWithoutDetaching($league->id);
