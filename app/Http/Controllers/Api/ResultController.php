@@ -21,7 +21,7 @@ class ResultController extends ApiController {
     public function byFilters(Request $request) {
         $data = $request->all();
 
-        $query = Game::with('league.category', 'league.match_structure')->with('competitors');
+        $query = Game::with('league.category', 'league.match_structure', 'sections', 'competitors');
 
         if (isset($data['category_id']) || isset($data['country_id'])) {
             $query->whereHas('league', function ($queryL) use ($data) {
@@ -424,6 +424,22 @@ class ResultController extends ApiController {
                 "mensaje" => "Resultado existente"
             ], 200);
         }
+
+        return $this->successResponse([
+            "status" => "correcto"
+        ], 200);
+    }
+
+    public function resultSections(Request $request) 
+    {
+        $data = $request->all();
+        $disponible = null;
+
+        $result = Result::updateOrCreate([
+            "game_id" => $data['game_id']
+        ],[
+            "result" => $data['data']
+        ]);
 
         return $this->successResponse([
             "status" => "correcto"

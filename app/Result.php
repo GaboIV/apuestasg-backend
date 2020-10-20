@@ -11,4 +11,8 @@ class Result extends Model
         'competitor_id',
         'game_id'
     ];
+
+    protected $casts = [
+        'result' => 'array'
+    ];
 }

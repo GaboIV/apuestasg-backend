@@ -39,6 +39,10 @@ class Game extends Model {
         return $this->belongsToJson('App\Team', 'teams_id');
     }
 
+    public function sections() {
+        return $this->hasOne(Result::class, 'game_id', 'id');
+    }
+
     // public function getTeamsArrayAttribute() { 
     //     $teams_id =  $this->teams;
     //     $teams = [];

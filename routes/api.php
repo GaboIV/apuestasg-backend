@@ -79,7 +79,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         // Resultados
         Route::post('results/gamesByFilters', 'Api\ResultController@byFilters');
         Route::post('results/careersByFilters', 'Api\ResultController@byHipismFilters');
-        Route::post('results', 'Api\ResultController@resultCharge');
+        // Route::post('results', 'Api\ResultController@resultCharge');
+        Route::post('results', 'Api\ResultController@resultSections');
         Route::post('resultshipism', 'Api\ResultController@resultHipismCharge');
 
         // Equipos
