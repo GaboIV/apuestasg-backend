@@ -67,4 +67,39 @@ class Functions {
         }
         return (float) $fraction;
     }
+
+    public static function resultThreeOptions ($team1, $team2)
+    {
+        $result = $team1 - $team2;
+
+        if ($result == 0) {
+            return 'X';
+        } elseif ($result > 0) {
+            return '1';
+        } else {
+            return '2';
+        }
+    }
+
+    public static function resultTwoOptions ($team1, $team2)
+    {
+        $result = $team1 - $team2;
+
+        if ($result == 0) {
+            return '0';
+        } elseif ($result > 0) {
+            return '1';
+        } else {
+            return '2';
+        }
+    }
+
+    public static function resultScoreBothOptions ($team1, $team2)
+    {
+        if ($team1 > 0 && $team2 > 0) {
+            return "J";
+        } else {
+            return "N";
+        }
+    }
 }

@@ -9,6 +9,7 @@ use App\Ticket;
 use App\Result;
 use App\Selection;
 use App\Competitor;
+use App\Helpers\Functions;
 use App\Inscription;
 use App\Transaction;
 use Illuminate\Http\Request;
@@ -16,18 +17,20 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\Eloquent\Builder;
 
-class ResultController extends ApiController {
+class ResultController extends ApiController
+{
 
-    public function byFilters(Request $request) {
+    public function byFilters(Request $request)
+    {
         $data = $request->all();
 
         $query = Game::with('league.category', 'league.match_structure', 'sections', 'competitors');
 
         if (isset($data['category_id']) || isset($data['country_id'])) {
             $query->whereHas('league', function ($queryL) use ($data) {
-                if (isset($data['category_id']) && $data['category_id'] != 0) 
+                if (isset($data['category_id']) && $data['category_id'] != 0)
                     $queryL->where('category_id', '=', $data['category_id']);
-                if (isset($data['country_id']) && $data['country_id'] != 0) 
+                if (isset($data['country_id']) && $data['country_id'] != 0)
                     $queryL->where('country_id', '=', $data['country_id']);
             });
         }
@@ -45,8 +48,8 @@ class ResultController extends ApiController {
         }
 
         $games = $query
-        ->orderBy('start', 'asc')
-        ->paginate(50);
+            ->orderBy('start', 'asc')
+            ->paginate(50);
 
         foreach ($games as $game) {
             if ($game->status == 3) {
@@ -66,7 +69,8 @@ class ResultController extends ApiController {
         ], 200);
     }
 
-    public function byHipismFilters(Request $request) {
+    public function byHipismFilters(Request $request)
+    {
         $data = $request->all();
         $fecha_actual = date("Y-m-d H:i:s");
         $i = 0;
@@ -95,8 +99,8 @@ class ResultController extends ApiController {
             $carreras[$i]['inscriptions'] = $car->inscriptions;
 
             $resultado = Result::whereCategoryId(7)
-            ->whereGameId($car->id)
-            ->first();
+                ->whereGameId($car->id)
+                ->first();
 
             if ($resultado) {
                 $result = explode('!', $resultado->result);
@@ -132,14 +136,14 @@ class ResultController extends ApiController {
         ], 200);
     }
 
-    public function resultChargeOld(Request $request) 
+    public function resultChargeOld(Request $request)
     {
         $data = $request->all();
         $disponible = null;
 
         $result_exist = Result::whereGameId($data['game_id'])
-        ->where('category_id', '!=', 7)
-        ->first();
+            ->where('category_id', '!=', 7)
+            ->first();
 
         if (!$result_exist) {
             $result = Result::create($data);
@@ -150,9 +154,9 @@ class ResultController extends ApiController {
 
             if ($res[0] > $res[1]) {
                 $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'asc')->get('id');
+                    ->without('team')->orderBy('id', 'asc')->get('id');
 
-                $k=0;
+                $k = 0;
 
                 foreach ($competitors as $cp) {
                     if ($k == 0) {
@@ -164,7 +168,7 @@ class ResultController extends ApiController {
                 }
             } elseif ($res[0] == $res[1]) {
                 $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'asc')->get();
+                    ->without('team')->orderBy('id', 'asc')->get();
 
                 foreach ($competitors as $cp) {
                     if ($cp['team_id'] == 1) {
@@ -175,9 +179,9 @@ class ResultController extends ApiController {
                 }
             } elseif ($res[0] < $res[1]) {
                 $competitors = Competitor::whereGameId($data['game_id'])
-                ->without('team')->orderBy('id', 'desc')->get('id');
+                    ->without('team')->orderBy('id', 'desc')->get('id');
 
-                $k=0;
+                $k = 0;
 
                 foreach ($competitors as $cp) {
                     if ($k == 0) {
@@ -195,8 +199,8 @@ class ResultController extends ApiController {
             }
 
             $selections = Selection::whereSample($data['game_id'])
-            ->where('category_id', '!=', 7)
-            ->where('ticket_id', '!=', null)->get();
+                ->where('category_id', '!=', 7)
+                ->where('ticket_id', '!=', null)->get();
 
             if (count($selections) > 0) {
                 foreach ($selections as $sel) {
@@ -218,17 +222,20 @@ class ResultController extends ApiController {
 
                         if (!isset($div_div[1])) {
                             $div_div[1] = 1;
-                        }                                       
+                        }
 
                         $decimal_odd = (intval($div_div[0]) / intval($div_div[1])) + 1;
 
-                        if ($competitor['status'] == '1') { $acumulado = $acumulado * $decimal_odd; } 
-                        elseif ($competitor['status'] == '2') { } 
-                        elseif ($competitor['status'] == '3') { 
+                        if ($competitor['status'] == '1') {
+                            $acumulado = $acumulado * $decimal_odd;
+                        } elseif ($competitor['status'] == '2') {
+                        } elseif ($competitor['status'] == '3') {
                             $full = 'false';
 
                             $parleys = Ticket::whereId($codigo)->update(array('status' => 3));
-                        } elseif ($competitor['status'] == '0') { $full = 'pendiente'; }
+                        } elseif ($competitor['status'] == '0') {
+                            $full = 'pendiente';
+                        }
                     }
 
                     if ($full == 'true') {
@@ -273,7 +280,7 @@ class ResultController extends ApiController {
         ], 200);
     }
 
-    public function resultCharge(Request $request) 
+    public function resultCharge(Request $request)
     {
         $data = $request->all();
         $disponible = null;
@@ -289,18 +296,18 @@ class ResultController extends ApiController {
 
                     $tickets = Ticket::whereHas('selections', function ($query) use ($key, $opt) {
                         $query->Where('select_id', $key)
-                        ->where('category_id', '!=', '7');
+                            ->where('category_id', '!=', '7');
                     })
-                    ->with('selections')
-                    ->whereStatus(0)
-                    ->get();
+                        ->with('selections')
+                        ->whereStatus(0)
+                        ->get();
 
                     foreach ($tickets as $key => $ticket) {
                         $pay = true;
                         $odd_to_pay = 1;
 
                         foreach ($ticket->selections as $key => $selection) {
-                            if (! $selection->competitor->winner) {
+                            if (!$selection->competitor->winner) {
                                 $pay = false;
                             } else {
                                 if ($selection->competitor->winner == $selection->type) {
@@ -311,7 +318,6 @@ class ResultController extends ApiController {
                                     \Log::info("Odd_to_pay multiplicador: " . floatval($selection->value));
 
                                     \Log::info("Odd_to_pay resultado: " . $odd_to_pay);
-
                                 } elseif ($selection->competitor->winner != $selection->type) {
                                     $pay = false;
                                     $ticket->update(["status" => 3]);
@@ -341,7 +347,7 @@ class ResultController extends ApiController {
                                 "ticket_id" => $ticket->code,
                                 "amount" => $amount_to_pay,
                                 "player_balance" => $new_balance
-                            ]);                           
+                            ]);
                         }
                     }
 
@@ -430,36 +436,175 @@ class ResultController extends ApiController {
         ], 200);
     }
 
-    public function resultSections(Request $request) 
+    public function resultSections(Request $request)
     {
         $data = $request->all();
         $disponible = null;
 
+        $game = Game::whereId($data['game_id'])->with('competitors.bet_type', 'league.match_structure')->first();
+
+        $game['result_halftime'] = 0;
+        $game['result_fullmatch'] = 0;
+        $game['win_halftime'] = null;
+        $game['win_fullmatch'] = null;
+
+        $halftime_number = $game->league->match_structure->halftime;
+
         $result = Result::updateOrCreate([
             "game_id" => $data['game_id']
-        ],[
+        ], [
             "result" => $data['data']
         ]);
+
+        foreach ($game->teams as $key => $team) {
+            $team['result_halftime'] = 0;
+            $team['result_fullmatch'] = 0;
+
+            foreach ($data['data'] as $key_result => $result) {
+                if ($key_result == $halftime_number) {
+                    $team['result_halftime'] += $result[$key];
+                }
+
+                $team['result_fullmatch'] += $result[$key];
+            }
+
+            $game['result_halftime']  += $team['result_halftime'];
+            $game['result_fullmatch'] += $team['result_fullmatch'];
+        }
+
+        if (count($game['teams']) == 2) {
+            $game['win_halftime'] = Functions::resultThreeOptions(
+                $game['teams'][0]['result_halftime'], 
+                $game['teams'][1]['result_halftime']
+            );
+
+            $game['win_fullmatch'] = Functions::resultThreeOptions(
+                $game['teams'][0]['result_fullmatch'], 
+                $game['teams'][1]['result_fullmatch']
+            );
+        }
+
+        foreach ($game->competitors as $key => $competitor) {
+            switch ($competitor->bet_type->name) {
+                case 'standard':
+                    $competitor->update([
+                        "winner" => [$game['win_fullmatch']]
+                    ]);
+                break;
+
+                case 'double-chance':
+                    switch ($game['win_fullmatch']) {
+                        case '1':
+                            $competitor->update([
+                                "winner" => ["1X", "12"]
+                            ]);
+                            break;
+
+                        case 'X':
+                            $competitor->update([
+                                "winner" => ["1X", "X2"]
+                            ]);
+                            break;
+
+                        case '2':
+                            $competitor->update([
+                                "winner" => ["X2", "12"]
+                            ]);
+                            break;
+                    }
+                break;
+
+                case 'handicap':
+                    $handicap = explode(":", $competitor->code);
+
+                    $competitor_winner_handicap = Functions::resultThreeOptions(
+                        $game['teams'][0]['result_fullmatch'] + $handicap[0], 
+                        $game['teams'][1]['result_fullmatch'] + $handicap[1]
+                    );
+
+                    $competitor->update([
+                        "winner" => [$competitor_winner_handicap]
+                    ]);
+                break; 
+                
+                case 'points-more-less-than':
+                    if ($competitor->code < $game['result_fullmatch']) {
+                        $competitor_winner_than = "+";
+                    } elseif ($competitor->code > $game['result_fullmatch']) {
+                        $competitor_winner_than = "-";
+                    } else {
+                        $competitor_winner_than = "0";
+                    }
+
+                    $competitor->update([
+                        "winner" => [$competitor_winner_than]
+                    ]);
+                break;
+
+                case 'section-win':
+                    $competitor->update([
+                        "winner" => [$game['win_halftime']]
+                    ]);
+                break;
+
+                case 'section-points-more-less':
+                    if ($competitor->code < $game['result_fullmatch']) {
+                        $competitor_winner_than = "+";
+                    } elseif ($competitor->code > $game['result_fullmatch']) {
+                        $competitor_winner_than = "-";
+                    } else {
+                        $competitor_winner_than = "0";
+                    }
+
+                    $competitor->update([
+                        "winner" => [$competitor_winner_than]
+                    ]);
+                break;
+
+                case 'head-to-head':
+                    $competitor_winner_head = Functions::resultTwoOptions(
+                        $game['teams'][0]['result_halftime'], 
+                        $game['teams'][1]['result_halftime']
+                    );
+
+                    $competitor->update([
+                        "winner" => [$competitor_winner_head]
+                    ]);
+                break;
+
+                case 'score-both':
+                    $competitor_winner_both = Functions::resultScoreBothOptions(
+                        $game['teams'][0]['result_halftime'], 
+                        $game['teams'][1]['result_halftime']
+                    );
+
+                    $competitor->update([
+                        "winner" => [$competitor_winner_both]
+                    ]);
+                break;
+            }
+        }
 
         return $this->successResponse([
             "status" => "correcto"
         ], 200);
     }
 
-    public function resultHipismCharge(Request $request) {
+    public function resultHipismCharge(Request $request)
+    {
         $data = $request->all();
         $disponible = null;
 
         $result_exist = Result::whereGameId($data['game_id'])
-        ->whereCategoryId($data['category_id'])
-        ->first();
+            ->whereCategoryId($data['category_id'])
+            ->first();
 
         if (!$result_exist) {
             $result = Result::create($data);
 
             $career = Career::whereId($data['game_id'])
-            ->with('inscriptions')
-            ->first();
+                ->with('inscriptions')
+                ->first();
 
             $career->update(array('status' => 3));
 
@@ -471,7 +616,7 @@ class ResultController extends ApiController {
 
             if ($win[1] < 3400) {
                 $cuota1 = 1.7; // 3740
-            } elseif ($win[1] > 3400 AND $win[1] < 6000) {
+            } elseif ($win[1] > 3400 and $win[1] < 6000) {
                 $cuota1 = ($win[1] + 500) / 2200;
             } elseif ($win[1] > 6000) {
                 $cuota1 = ($win[1] + 3000) / 2200;
@@ -495,12 +640,12 @@ class ResultController extends ApiController {
                     ]);
                 } else {
                     $ins->update(['status' => 99]);
-                }               
+                }
             }
 
             $selections = Selection::whereSample($data['game_id'])
-            ->whereCategoryId($data['category_id'])
-            ->where('ticket_id', '!=', null)->get();
+                ->whereCategoryId($data['category_id'])
+                ->where('ticket_id', '!=', null)->get();
 
             if (count($selections) > 0) {
                 foreach ($selections as $sel) {
@@ -523,18 +668,18 @@ class ResultController extends ApiController {
 
                                 $parleys = Ticket::whereId($codigo)->update(array('status' => 3));
                             } elseif ($inscription['status'] == 3 && $tik['type'] == 7) {
-                                $full = 'false';  
+                                $full = 'false';
 
-                                $parleys = Ticket::whereId($codigo)->update(array('status' => 3));  
+                                $parleys = Ticket::whereId($codigo)->update(array('status' => 3));
                             } elseif ($inscription['status'] == 0) {
                                 $full = 'pendiente';
                             } else {
                                 $full = 'false';
 
                                 $parleys = Ticket::whereId($codigo)->update(array('status' => 3));
-                            }                
+                            }
                         }
-                    }                   
+                    }
 
                     if ($full == 'true') {
                         $parleys = Ticket::whereId($codigo)->get();

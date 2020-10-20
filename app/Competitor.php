@@ -22,7 +22,8 @@ class Competitor extends Model {
     ];
 
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
+        'winner' => 'array'
     ];
 
     public function game() {
