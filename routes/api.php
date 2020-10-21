@@ -76,6 +76,9 @@ Route::group(['middleware' => 'auth:api'], function () {
             'create', 'edit'
         ]);
 
+        // Tickets
+        Route::post('tickets/verify', 'Api\TicketController@verify');
+
         // Resultados
         Route::post('results/gamesByFilters', 'Api\ResultController@byFilters');
         Route::post('results/careersByFilters', 'Api\ResultController@byHipismFilters');

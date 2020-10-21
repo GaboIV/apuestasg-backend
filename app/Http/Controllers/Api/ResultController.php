@@ -15,6 +15,7 @@ use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiController;
+use App\Jobs\VerifyTicketsJob;
 use Illuminate\Database\Eloquent\Builder;
 
 class ResultController extends ApiController
@@ -482,6 +483,10 @@ class ResultController extends ApiController
                 $game['teams'][0]['result_fullmatch'], 
                 $game['teams'][1]['result_fullmatch']
             );
+
+            Game::whereId($data['game_id'])->update([
+                "result" => $game['teams'][0]['result_fullmatch'] . "-" . $game['teams'][1]['result_fullmatch']
+            ]);
         }
 
         foreach ($game->competitors as $key => $competitor) {
@@ -585,8 +590,11 @@ class ResultController extends ApiController
             }
         }
 
+        VerifyTicketsJob::dispatch(["id" => $game->id]);
+
         return $this->successResponse([
-            "status" => "correcto"
+            "status" => "correcto",
+            "game" => $game
         ], 200);
     }
 

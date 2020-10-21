@@ -19,6 +19,7 @@ class Game extends Model {
         'start',
         'url',
         'teams_id',
+        'result',
         'description'
     ];
 
