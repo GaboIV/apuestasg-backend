@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Competitor;
 use App\Game;
-use App\Http\Controllers\ApiController;
-use App\Http\Requests\LoginRequest;
-use App\Inscription;
-use App\Selection;
 use App\Team;
+use App\Selection;
+use App\Competitor;
+use App\Inscription;
 use Illuminate\Http\Request;
+use App\Events\UserSessionChanged;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApiController;
 
 class SessionController extends ApiController {
     public function loadSelections() {
@@ -97,6 +98,8 @@ class SessionController extends ApiController {
         $mstatus = '';
         $selecciones = [];
         $tipo = '';
+
+        broadcast(new UserSessionChanged(" ha iniciado sesión", 'success'));
         
         $exists = Selection::whereSelectId($data['bet_id'])
         ->where('type', $data['item_id'])
