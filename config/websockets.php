@@ -8,7 +8,7 @@ return [
      * Set a custom dashboard configuration
      */
     'dashboard' => [
-        'port' => env('LARAVEL_WEBSOCKETS_PORT', 6001),
+        'port' => env('LARAVEL_WEBSOCKETS_PORT', 443) // <- we changed this to 443
     ],
 
     /*
@@ -27,10 +27,10 @@ return [
             'name' => env('APP_NAME'),
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
-            'path' => env('PUSHER_APP_PATH'),
-            'capacity' => null,
-            'enable_client_messages' => false,
+            'enable_client_messages' => true,
             'enable_statistics' => true,
+            'encrypted' => true,
+            'host' => env('WEBSOCKETS_URL') // for dashboard
         ],
     ],
 
@@ -48,7 +48,7 @@ return [
      * Leave this empty if you want to accept requests from all hosts.
      */
     'allowed_origins' => [
-        //
+        
     ],
 
     /*
@@ -102,7 +102,7 @@ return [
          * Use an DNS resolver to make the requests to the statistics logger
          * default is to resolve everything to 127.0.0.1.
          */
-        'perform_dns_lookup' => false,
+        'perform_dns_lookup' => true, // For statistics to work
     ],
 
     /*
@@ -110,24 +110,10 @@ return [
      * You can see all available options at: http://php.net/manual/en/context.ssl.php
      */
     'ssl' => [
-        /*
-         * Path to local certificate file on filesystem. It must be a PEM encoded file which
-         * contains your certificate and private key. It can optionally contain the
-         * certificate chain of issuers. The private key also may be contained
-         * in a separate file specified by local_pk.
-         */
         'local_cert' => env('LARAVEL_WEBSOCKETS_SSL_LOCAL_CERT', null),
-
-        /*
-         * Path to local private key file on filesystem in case of separate files for
-         * certificate (local_cert) and private key.
-         */
         'local_pk' => env('LARAVEL_WEBSOCKETS_SSL_LOCAL_PK', null),
-
-        /*
-         * Passphrase for your local_cert file.
-         */
-        'passphrase' => env('LARAVEL_WEBSOCKETS_SSL_PASSPHRASE', null),
+        'passphrase' => null,
+        'verify_peer' => false
     ],
 
     /*

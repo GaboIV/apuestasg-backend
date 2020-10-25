@@ -153,31 +153,13 @@ class GeneralController extends ApiController {
         date_add($fecha_manana, date_interval_create_from_date_string('7 days'));
         $fecha_manana = date_format($fecha_manana, 'Y-m-d H:i:s');
 
-        // $juegos = League::whereHas('games', function ($query) use ($fecha_manana) {
-        //                     $query->where('start', '>=', date("Y-m-d H:i:s"));
-        //                     $query->where('start', '<=', $fecha_manana);
-        //                 })
-        //                 ->with(["games" => function($q) use ($fecha_manana) {
-        //                     $q->with('competitors');
-        //                     $q->where('start', '>=', date("Y-m-d H:i:s"));
-        //                     $q->where('start', '<=', $fecha_manana);
-        //                 }])
-        //                 ->where('leagues.category_id', $id)
-        //                 ->get();
-
-        // $destacados = DB::table('games') 
-        //     ->where('start', '>=', date("Y-m-d H:i:s"))
-        //     ->where('start', '<=', $fecha_manana)  
-        //     ->whereOutstanding(true)
-        //     ->limit(12)  
-        //     ->get();
-
         $destacados = Game::where('start', '>=', date("Y-m-d H:i:s"))
         ->whereOutstanding(true)
         ->with('competitors.bet_type')
         ->with('league')
         ->with('teams.country')
-        ->limit(12)  
+        ->limit(15)
+        ->orderBy('start', 'asc')  
         ->get();
 
         return $this->successResponse([
