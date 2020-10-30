@@ -17,7 +17,9 @@ class CreateRacecoursesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('location');
-            $table->string('acro_2');
+            $table->string('acro');
+            $table->string('origin')->nullable();
+            $table->string('url')->nullable();
             $table->timestamps();
         });
     }

@@ -20,6 +20,8 @@ class CreateHorsesTable extends Migration
             $table->string('name');
             $table->enum('sex', Horse::$sexs);
             $table->enum('breed', Horse::$breeds);
+            $table->string('color');
+            $table->text('jacket_url');
             $table->date('birthday')->nullable();
             $table->unsignedBigInteger('father_id');
             $table->foreign('father_id')

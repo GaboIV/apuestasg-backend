@@ -16,6 +16,7 @@ class CreateJockeysTable extends Migration
         Schema::create('jockeys', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
+            $table->string('name_id');
             $table->decimal('weight');
             $table->decimal('height');
             $table->unsignedBigInteger('country_id');

@@ -15,16 +15,17 @@ class CreatePaysTable extends Migration
     {
         Schema::create('pays', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('code', 15);
             $table->decimal('amount');
             $table->string('document');
             $table->date('register_date');
             $table->string('reference');
             $table->string('email');
-            $table->boolean('status')->default(null);
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')
+            $table->tinyInteger('status')->default(3);
+            $table->unsignedBigInteger('player_id');
+            $table->foreign('player_id')
                 ->references('id')
-                ->on('users');
+                ->on('players');
             $table->unsignedBigInteger('bank_id');
             $table->foreign('bank_id')
                 ->references('id')

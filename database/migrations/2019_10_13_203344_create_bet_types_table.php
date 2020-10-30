@@ -15,7 +15,7 @@ class CreateBetTypesTable extends Migration
     {
         Schema::create('bet_types', function( Blueprint $table ) {
             $table->bigIncrements('id');
-            $table->string('description_web');
+            $table->string('name');
             $table->string('description');
             $table->string('adding')->nullable();
             $table->unsignedBigInteger('index')->nullable();

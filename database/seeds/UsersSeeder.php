@@ -14,15 +14,15 @@ class UsersSeeder extends Seeder
      */
     public function run()
     {
-        $role_player = Role::where('name', 'player')->first();
-        $role_admin = Role::where('name', 'admin')->first();
+        // $role_player = Role::where('name', 'player')->first();
+        // $role_admin = Role::where('name', 'admin')->first();
 
         $user = new User();
         $user->nick = 'gaboiv';
         $user->email = 'gabrielcaraballo1907@gmail.com';
         $user->password = '222222';
         $user->save();
-        $user->roles()->attach($role_player);
+        // $user->roles()->attach($role_player);
  
          // Datos usuario cliente
          $player = new Player;
@@ -45,7 +45,7 @@ class UsersSeeder extends Seeder
         $user->email = 'master@apuestasg.com';
         $user->password = '222222';
         $user->save();
-        $user->roles()->attach($role_admin);
+        // $user->roles()->attach($role_admin);
 
         // Datos usuario cliente
         $player = new Player;

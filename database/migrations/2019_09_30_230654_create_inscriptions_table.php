@@ -31,20 +31,14 @@ class CreateInscriptionsTable extends Migration
             $table->foreign('trainer_id')
                 ->references('id')
                 ->on('trainers');
-            $table->unsignedBigInteger('stud_id');
-            $table->foreign('stud_id')
-                ->references('id')
-                ->on('studs');
-            $table->unsignedBigInteger('stud2_id');
-            $table->foreign('stud2_id')
-                ->references('id')
-                ->on('studs');
+            $table->json('studs');
             $table->decimal('weight');
             $table->string('medicines');
             $table->string('implements');
             $table->string('number');
             $table->string('position');
             $table->boolean('status');
+            $table->string('odd', 50);
             $table->timestamps();
         });
     }

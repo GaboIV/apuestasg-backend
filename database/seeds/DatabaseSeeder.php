@@ -11,31 +11,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // Países
-        DB::unprepared(file_get_contents(public_path() . '/seeds/countries.sql'));
-        // Estados de Venezuela
-        DB::unprepared(file_get_contents(public_path() . '/seeds/states.sql'));
-        // Ciudades de Venezuela
-        DB::unprepared(file_get_contents(public_path() . '/seeds/cities.sql'));
-        // Parroquias de Venezuela
-        DB::unprepared(file_get_contents(public_path() . '/seeds/parishes.sql'));
-
-        // La creación de datos de roles debe ejecutarse primero
-        $this->call(RoleSeeder::class);
-
-        // Los usuarios necesitarán los roles previamente generados
-        $this->call(UsersSeeder::class);
-
-        // Deportes
-        $this->call(CategoriesSeeder::class);
-
-        // Tipos de apuestas
-        $this->call(BetTypeSeeder::class);
-
-        // Ligas
-        $this->call(LeaguesSeeder::class);
-
-        // Ligas
-        $this->call(TeamsSeeder::class);
+        $this->call(AccountsTableSeeder::class);
+        $this->call(AssistsTableSeeder::class);
+        $this->call(BanksTableSeeder::class);
+        $this->call(BetTypesTableSeeder::class);
+        $this->call(CategoriesTableSeeder::class);
+        $this->call(ChangelogsTableSeeder::class);
+        $this->call(CitiesTableSeeder::class);
+        $this->call(ConfigurationTableSeeder::class);
+        $this->call(CountriesTableSeeder::class);
+        $this->call(EventTypesTableSeeder::class);
+        $this->call(HarasTableSeeder::class);
+        $this->call(HorsesTableSeeder::class);
+        $this->call(JockeysTableSeeder::class);
+        $this->call(LeagueTeamTableSeeder::class);
+        $this->call(LeaguesTableSeeder::class);
+        $this->call(MatchStructuresTableSeeder::class);
+        $this->call(ParishesTableSeeder::class);
+        $this->call(PitchersTableSeeder::class);
+        $this->call(PlayersTableSeeder::class);
+        $this->call(RacecoursesTableSeeder::class);
+        $this->call(StatesTableSeeder::class);
+        $this->call(StudsTableSeeder::class);
+        $this->call(TeamsTableSeeder::class);
+        $this->call(TrainersTableSeeder::class);
+        $this->call(TransactionsTableSeeder::class);
+        $this->call(UsersTableSeeder::class);
     }
 }

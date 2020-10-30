@@ -18,7 +18,9 @@
         "laravel/telescope": "^3.0",
         "laravel/tinker": "^1.0",
         "laraveles/spanish": "^1.3",
+        "orangehill/iseed": "^2.6",
         "pusher/pusher-php-server": "~3.0",
+        "spatie/laravel-permission": "^3.17",
         "staudenmeir/eloquent-json-relations": "^1.1",
         "twilio/sdk": "^6.10"
     },

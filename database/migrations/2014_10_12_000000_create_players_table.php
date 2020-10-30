@@ -45,6 +45,10 @@ class CreatePlayersTable extends Migration
             $table->decimal('available', 17,2)->default(0);
             $table->decimal('risk', 17,2)->default(0);
             $table->decimal('points', 17,2)->default(0);
+            $table->unsignedBigInteger('language_id')->nullable();
+            $table->string('timezone')->nullable();
+            $table->string('format_quot')->nullable();
+            $table->tinyInteger('offer')->nullable();
             $table->string('ip')->nullable();
             $table->string('browser')->nullable();
             $table->foreign('user_id')

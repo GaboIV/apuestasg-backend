@@ -16,6 +16,7 @@ class CreateTrainersTable extends Migration
         Schema::create('trainers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
+            $table->string('name_id');
             $table->unsignedBigInteger('country_id');
             $table->foreign('country_id')
                 ->references('id')

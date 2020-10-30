@@ -14,9 +14,10 @@ class CreateConfigurationTable extends Migration
     public function up()
     {
         Schema::create('configuration', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->string('group');
             $table->string('subgroup')->nullable();
-            $table->text('text');
+            $table->text('value');
             $table->timestamps();
         });
     }
