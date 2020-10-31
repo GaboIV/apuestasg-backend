@@ -3,13 +3,14 @@
 namespace App;
 
 use Laravel\Passport\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, HasRoles;
 
     protected $with = ["player"];
 
@@ -52,43 +53,39 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function roles()
+    public function hasRole($roles, string $guard = null): bool
     {
-        return $this
-            ->belongsToMany('App\Role')
-            ->withTimestamps();
-    }
-
-    public function authorizeRoles($roles)
-    {
-        if ($this->hasAnyRole($roles)) {
-            return true;
+        if (is_string($roles) && false !== strpos($roles, '|')) {
+            $roles = $this->convertPipeToArray($roles);
         }
-        abort(401, 'Esta acción no está autorizada.');
-    }
-    
-    public function hasAnyRole($roles)
-    {
+
+        if (is_string($roles)) {
+            return $guard
+                ? $this->roles->where('guard_name', $guard)->contains('name', $roles)
+                : $this->roles->contains('key', $roles);
+        }
+
+        if (is_int($roles)) {
+            return $guard
+                ? $this->roles->where('guard_name', $guard)->contains('id', $roles)
+                : $this->roles->contains('id', $roles);
+        }
+
+        if ($roles instanceof Role) {
+            return $this->roles->contains('id', $roles->id);
+        }
+
         if (is_array($roles)) {
             foreach ($roles as $role) {
-                if ($this->hasRole($role)) {
+                if ($this->hasRole($role, $guard)) {
                     return true;
                 }
             }
-        } else {
-            if ($this->hasRole($roles)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    public function hasRole($role)
-    {
-        if ($this->roles()->where('name', $role)->first()) {
-            return true;
+            return false;
         }
-        return false;
+
+        return $roles->intersect($guard ? $this->roles->where('guard_name', $guard) : $this->roles)->isNotEmpty();
     }
 
     public function player() {
