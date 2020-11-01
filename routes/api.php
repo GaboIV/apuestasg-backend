@@ -17,6 +17,9 @@ Route::group(['prefix' => 'public'], function () {
     // Obtener hora
     Route::get('/hora', 'General\GeneralController@hora');
 
+    // Sidebar
+    Route::get('/sidebar', 'General\SidebarController@getLeagues');
+
     //Número de juegos por categoría
     Route::get('/showgamesbycategory', 'General\GeneralController@showGamesByCategory');
 

@@ -49,9 +49,9 @@ class Functions {
 
     public static function objArraySearch($array, $index, $value)
     {
-        foreach ($array as $arrayInf) {
+        foreach ($array as $key => $arrayInf) {
             if (isset($arrayInf[$index]) && $arrayInf[$index] == $value) {
-                return $arrayInf;
+                return $key;
             }
         }
 
