@@ -25,7 +25,7 @@ class CreateAssistsTable extends Migration
             $table->unsignedBigInteger('player_id');
             $table->foreign('player_id')
                 ->references('id')
-                ->on('player_id');
+                ->on('players');
 
             $table->string('email_sent_player')->nullable();
             $table->string('email_sent_admin')->nullable();

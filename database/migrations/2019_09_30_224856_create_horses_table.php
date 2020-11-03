@@ -24,21 +24,21 @@ class CreateHorsesTable extends Migration
             $table->text('jacket_url');
             $table->date('birthday')->nullable();
             $table->unsignedBigInteger('father_id');
-            $table->foreign('father_id')
-                ->references('id')
-                ->on('horses');
+            // $table->foreign('father_id')
+            //     ->references('id')
+            //     ->on('horses');
             $table->unsignedBigInteger('mother_id');
-            $table->foreign('mother_id')
-                ->references('id')
-                ->on('horses');
+            // $table->foreign('mother_id')
+            //     ->references('id')
+            //     ->on('horses');
             $table->unsignedBigInteger('grandpa');
-            $table->foreign('grandpa')
-                ->references('id')
-                ->on('horses');
+            // $table->foreign('grandpa')
+            //     ->references('id')
+            //     ->on('horses');
             $table->unsignedBigInteger('haras_id');
-            $table->foreign('haras_id')
-                ->references('id')
-                ->on('haras');
+            // $table->foreign('haras_id')
+            //     ->references('id')
+            //     ->on('haras');
             $table->timestamps();
         });
     }
