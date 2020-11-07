@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Events\PlayerUpdated;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;

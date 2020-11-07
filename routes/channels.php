@@ -18,3 +18,7 @@ Broadcast::channel('App.User.{id}', function ($user, $id) {
 Broadcast::channel('notifications', function ($user) {
     return $user != null;
 });
+
+Broadcast::channel('players', function ($user) {
+    return $user != null;
+});

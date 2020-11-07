@@ -2,9 +2,11 @@
 
 namespace App;
 
-use App\Selection;
 use App\Ticket;
+use App\Selection;
 use App\Transaction;
+use App\Events\PlayerCreated;
+use App\Events\PlayerUpdated;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
@@ -86,4 +88,16 @@ class Player extends Model {
     public function getTotalAttribute() { 
         return $this->risk + $this->available;
     }
+
+    /**
+     * The event map for the model.
+     *
+     * Allows for object-based events for native Eloquent events.
+     *
+     * @var array
+     */
+    protected $dispatchesEvents = [
+        "created" => PlayerCreated::class,
+        "updated" => PlayerUpdated::class
+    ];
 }
