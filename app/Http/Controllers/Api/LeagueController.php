@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LeagueController extends ApiController 
 {
-    public function index() {
+    public function index() 
+    {
         $criterios = explode(" ", request()->criterio);
 
         $leagues = League::where(function($query) use($criterios){
@@ -33,7 +34,8 @@ class LeagueController extends ApiController
         ], 200);
     }
 
-    public function store(LeagueRequest $request) {
+    public function store(LeagueRequest $request) 
+    {
         $data = $request->all();
         
         $league = League::create($data);
@@ -43,11 +45,12 @@ class LeagueController extends ApiController
         ], 200);
     }
 
-    public function show($id) {
-        //
+    public function show($id) 
+    {
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id) 
+    {
         $data = $request->all();
 
         $team = League::whereId($id)
@@ -58,7 +61,8 @@ class LeagueController extends ApiController
         ], 200);
     }
 
-    public function byCategory(Request $request) {
+    public function byCategory(Request $request) 
+    {
         $data = $request->all();
 
         $query = League::where('name', '!=', null);
@@ -78,7 +82,7 @@ class LeagueController extends ApiController
         ], 200);
     }
 
-    public function destroy($id) {
-        //
+    public function destroy($id) 
+    {
     }
 }

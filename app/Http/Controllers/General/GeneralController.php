@@ -167,6 +167,20 @@ class GeneralController extends ApiController {
         ], 200);
     }
 
+    public function GamesByLeague($id) 
+    {
+        $games = Game::where('start', '>=', date("Y-m-d H:i:s"))
+                 ->with('competitors.bet_type', 'league', 'teams.country')
+                 ->whereLeagueId($id)
+                 ->orderBy('start', 'asc')  
+                 ->limit(20)
+                 ->get();
+
+        return $this->successResponse([
+            'games' => $games
+        ], 200);
+    }
+
     public function imageUploadPost(Request $request) {
         $data = $request->all();
   

@@ -17,7 +17,8 @@ use App\Http\Controllers\ApiController;
 
 class GameController extends ApiController
 {
-    public function index() {
+    public function index() 
+    {
         $games = Game::orderBy('start', 'desc')
                      ->with(["competitors.bet_type"])
                      ->with(["league" => function($q) {
@@ -30,7 +31,22 @@ class GameController extends ApiController
         ], 200);
     }
 
-    public function one($id) {
+    public function indexByLeague($id) 
+    {
+        $games = Game::where('start', '>=', date("Y-m-d H:i:s"))
+                 ->with('competitors.bet_type', 'league', 'teams.country')
+                 ->whereLeagueId($id)
+                 ->orderBy('start', 'asc')  
+                 ->limit(20)
+                 ->get();
+
+        return $this->successResponse([
+            'games' => $games
+        ], 200);
+    }
+
+    public function one($id) 
+    {
         $game = Game::whereId($id)
                      ->with(["competitors" => function($q) {
                             $q->with('team');
@@ -46,7 +62,8 @@ class GameController extends ApiController
         ], 200);
     }
 
-    public function updateOutstanding($id, Request $request) {
+    public function updateOutstanding($id, Request $request) 
+    {
         if ($request->has('outstanding')) {
             $game = Game::find($id);
 
@@ -60,7 +77,8 @@ class GameController extends ApiController
         ], 200);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request) 
+    {
         $data = $request->all();
 
         $league = new League(['id' => $data['league_id']]);
@@ -243,11 +261,12 @@ class GameController extends ApiController
         ], 200);
     }
 
-    public function show($id) {
-        //
+    public function show($id) 
+    {
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id) 
+    {
         $pitchers = $request->pitchers;
         $partido = $request->partido;
 
@@ -317,11 +336,12 @@ class GameController extends ApiController
         return $this->successResponse($result, 200);        
     }
 
-    public function destroy($id) {
-        //
+    public function destroy($id) 
+    {
     }
 
-    public function byFilters(Request $request) {
+    public function byFilters(Request $request) 
+    {
         $data = $request->all();
 
         $query = Game::with('league.category')->with('competitors');

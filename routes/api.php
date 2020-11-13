@@ -32,6 +32,9 @@ Route::group(['prefix' => 'public'], function () {
     // Ver equipos por búsqueda de nombre
     Route::post('games/byName', 'General\GeneralController@GamesBySearch');
 
+    // Ver partidos por liga
+    Route::get('games/byleague/{id}', 'General\GeneralController@GamesByLeague');
+
     // Ver cuentas de banco disponibles
     Route::get('accounts', 'General\GeneralController@getAccounts');
 
