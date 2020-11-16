@@ -169,6 +169,8 @@ class GeneralController extends ApiController {
 
     public function GamesByLeague($id) 
     {
+        $league = League::whereId($id)->with('category')->first();
+
         $games = Game::where('start', '>=', date("Y-m-d H:i:s"))
                  ->with('competitors.bet_type', 'league', 'teams.country')
                  ->whereLeagueId($id)
@@ -177,6 +179,9 @@ class GeneralController extends ApiController {
                  ->get();
 
         return $this->successResponse([
+            'league_id' => $id,
+            'name' => $league->name,
+            'category' => $league->category,
             'games' => $games
         ], 200);
     }
