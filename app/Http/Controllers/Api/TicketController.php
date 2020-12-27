@@ -181,7 +181,7 @@ class TicketController extends ApiController
 					$transaction = Transaction::create([
 						"event_type_id" => 1,
 						"player_id" => $player->id,
-						"ticket_id" => $cod_serial,
+						"ticket_id" => $ticket_id,
 						"amount" => $monto,
 						"player_balance" => $nuevo_d
 					]);

@@ -7,8 +7,10 @@ use App\Game;
 use App\Career;
 use App\League;
 use App\Account;
+use App\BetType;
 use App\Category;
 use App\Racecourse;
+use App\MatchStructure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -169,14 +171,61 @@ class GeneralController extends ApiController {
 
     public function GamesByLeague($id) 
     {
-        $league = League::whereId($id)->with('category')->first();
+        $league = League::whereId($id)->with('category')->first(['id', 'name', 'category_id']);
+
+        $structure = MatchStructure::whereCategoryId($league->category_id)->wherePrincipal(1)->first();
+
+        $bet_types = BetType::whereIn('id', $structure->main_bet_types)->get();
 
         $games = Game::where('start', '>=', date("Y-m-d H:i:s"))
-                 ->with('competitors.bet_type', 'league', 'teams.country')
+                 ->with(['competitors' => function ($query) use ($structure) {
+                     $query->whereIn('bet_type_id', $structure->main_bet_types)
+                     ->orderBy('bet_type_id', 'asc')
+                     ->orderBy('code', 'asc')
+                     ->select('id', 'code', 'data', 'bet_type_id', 'game_id');
+                 }])
+                 ->with(['teams' => function ($query) {
+					 $query->select('id', 'name', 'image_link');
+				 }])
                  ->whereLeagueId($id)
                  ->orderBy('start', 'asc')  
-                 ->limit(20)
+                 ->limit(50)
+                 ->select('id', 'start', 'league_id', 'teams_id')
                  ->get();
+
+
+        
+        foreach ($games as $key => $game) {
+        	$options = [];
+
+        	foreach ($structure->main_bet_types as $type) {
+        		$options_temp = [];
+
+        		foreach ($game->competitors as $key => &$competitor) {
+        			if ($competitor->bet_type_id == $type) {
+        				if (count($options_temp) == 0) {
+        					$competitor->selected = true;
+        				} else {
+        					$competitor->selected = false;
+        				}
+
+        				$options_temp[] = $competitor;
+        			}
+        		}
+
+        		// $bet_types_name = $bet_types->where('id', $type)->first()->name;
+
+        		if (count($options_temp) > 1) {
+        			$options[] = $options_temp;
+        		} else {
+        			$options[] = $options_temp;
+        		}
+        	}
+
+        	unset($game->competitors);
+        	$game->options = $options;
+        }
+        
 
         return $this->successResponse([
             'league_id' => $id,

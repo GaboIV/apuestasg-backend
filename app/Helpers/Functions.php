@@ -51,6 +51,17 @@ class Functions {
     {
         foreach ($array as $key => $arrayInf) {
             if (isset($arrayInf[$index]) && $arrayInf[$index] == $value) {
+                return $arrayInf;
+            }
+        }
+
+        return false;
+    }
+
+    public static function objArrayKeySearch($array, $index, $value)
+    {
+        foreach ($array as $key => $arrayInf) {
+            if (isset($arrayInf[$index]) && $arrayInf[$index] == $value) {
                 return $key;
             }
         }

@@ -356,8 +356,12 @@ class GameController extends ApiController
         }
 
         if (isset($data['start']) && $data['start'] != 0) {
-        	$query->where('start', '>=', $data['start'] . " 00:01");
-            $query->where('start', '<=', $data['start'] . " 23:59");
+            if ($data['date_greater_than']) {
+                $query->where('start', '>=', $data['start'] . " 00:00:01");
+            } else {
+                $query->where('start', '>=', $data['start'] . " 00:00:01");
+                $query->where('start', '<=', $data['start'] . " 23:59:59");
+            }
         }
 
         if (isset($data['name']) && $data['name'] != '' && $data['name'] != 'todos' && $data['name'] != 'todas') {
@@ -367,7 +371,7 @@ class GameController extends ApiController
 			});
         }
 
-        $games = $query->paginate(50);
+        $games = $query->orderBy('start', 'asc')->paginate(50);
 
         return $this->successResponse([
             'games' => $games

@@ -34,7 +34,7 @@ class SidebarController extends ApiController
         foreach ($categories as $key => &$category) {
             $category['countries'] = [];
             foreach ($category['leagues'] as $key => $league) {
-                $country_search = Functions::objArraySearch($category['countries'], "name", $league['country']['name']);
+                $country_search = Functions::objArrayKeySearch($category['countries'], "name", $league['country']['name']);
 
                 if ($country_search === false) {
                     $category['countries'][] = [

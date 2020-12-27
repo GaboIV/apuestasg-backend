@@ -185,7 +185,11 @@ class LeagueController extends ApiController
                     "name_uk" => $arrays_name_uk
                 ]);
             }    
-        }            
+        } else {
+        	$league->update([
+                "name_uk" => [$data['name_uk']]
+            ]);
+        }         
 
         return $this->successResponse([
             'league' => $league

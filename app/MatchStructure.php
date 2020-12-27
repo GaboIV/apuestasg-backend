@@ -14,7 +14,8 @@ class MatchStructure extends Model
     ];
 
     protected $casts = [
-        'principal' => 'boolean'
+        'principal' => 'boolean',
+        'main_bet_types' => 'array'
     ];
 
     public function category() {
