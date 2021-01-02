@@ -2,26 +2,35 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\ApiController;
 use App\Team;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\Eloquent\Builder;
 
 class TeamController extends ApiController {
 
     public function index() {
         $criterios = explode(" ", request()->criterio);
 
-        $teams = Team::where(function($query) use($criterios){
-                    if (request()->criterio != 'todos') {
-                        foreach($criterios as $keyword) {
-                            $query->orWhere('name', 'LIKE', "%$keyword%");
-                            $query->orWhere('name_id', 'LIKE', "%$keyword%");
-                        }
-                    }                    
-                })
-                ->orderBy('id', 'desc')
-                ->with('leagues')
-                ->paginate(25);
+        $query_teams = Team::with('leagues')
+        ->where(function($query) use($criterios){
+            if (request()->criterio != 'todos') {
+                foreach($criterios as $keyword) {
+                    $query->orWhere('name', 'LIKE', "%$keyword%");
+                    $query->orWhere('name_id', 'LIKE', "%$keyword%");
+                }
+            }                    
+        })->orderBy('id', 'desc');
+
+        if (request()->league_id != 'todas') {
+            $league_id = request()->league_id;
+
+            $query_teams->whereHas('leagues', function (Builder $query) use ($league_id) {
+                $query->where('leagues.id', $league_id);
+            });
+        }
+        
+        $teams = $query_teams->paginate(25);
 
         return $this->successResponse([
             'teams' => $teams
