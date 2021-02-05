@@ -271,7 +271,7 @@ class GeneralController extends ApiController {
         $fecha_for_1 = date("Y-m-d H:i:s");
         $fecha = [];
 
-        $query = Career::orderBy('racecourse_id', 'Desc');
+        $query = Career::orderBy('racecourse_id', 'Desc')->orderBy('posttime', 'asc');
 
         $query->where('date', '>=', date("Y-m-d"))->where('posttime', '>=', $fecha_for_1);
 

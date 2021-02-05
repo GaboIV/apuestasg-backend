@@ -31,7 +31,7 @@ class LeagueController extends ApiController
     
                 $key_sport = key($data->availableMarkets);
 
-                if (isset($data->sports) && in_array($key_sport, $data->sports) ) {
+                if (isset($data->sports) && count($data->sports) > 0 && $key_sport == $data->sports[0]->sportId) {
 
                     $games = $data->events;
     

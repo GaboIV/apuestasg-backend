@@ -36,6 +36,8 @@ class SyncLeagueJob implements ShouldQueue
     {
         $league = $this->league;
 
+        \Log::info("Start sync for league: " . $league->name);
+
         if ($league->name_uk) {
             foreach ($league->name_uk as $key => $sync_id) {
                 $client = new \GuzzleHttp\Client(['verify' => false, 'headers' => [
@@ -48,7 +50,7 @@ class SyncLeagueJob implements ShouldQueue
     
                 $key_sport = key($data->availableMarkets);
 
-                if (isset($data->sports) && in_array($key_sport, $data->sports) ) {
+                if (isset($data->sports) && count($data->sports) > 0 && $key_sport == $data->sports[0]->sportId) {
 
                     $games = $data->events;
     
