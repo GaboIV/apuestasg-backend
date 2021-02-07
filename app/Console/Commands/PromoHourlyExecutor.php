@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Events\RemainingTimeChanged;
-use App\Events\WinnerNumberGenerated;
+use App\Promo;
 use Illuminate\Console\Command;
+use App\Events\PromoHourlyAdded;
+use App\Events\WinnerNumberGenerated;
 
 class PromoHourlyExecutor extends Command
 {
@@ -21,8 +22,6 @@ class PromoHourlyExecutor extends Command
      * @var string
      */
     protected $description = 'Execute Promo Hourly';
-
-    private $time = 15;
 
     /**
      * Create a new command instance.
@@ -41,21 +40,34 @@ class PromoHourlyExecutor extends Command
      */
     public function handle()
     {
-        while (true) {
-            broadcast(new RemainingTimeChanged($this->time . 's'));
 
-            $this->time--;
-            sleep(1);
+        $now    = date('Y-m-d H:i:00');
 
-            if ($this->time === 0) {
-                $this->time = "Waiting to start";
-                broadcast(new RemainingTimeChanged($this->time));
+        $promo_actual = Promo::where('time', $now)->first();
 
-                broadcast(new WinnerNumberGenerated(mt_rand(0,32)));
-                sleep(9);
-
-                $this->time = 15;
-            }
+        if(! $promo_actual) {
+            Promo::create([
+                "group" => "Hourly",
+                "time" => $now
+            ]);
         }
+
+        $add15  = strtotime("+15 minutes", strtotime($now));
+        $time   = date('Y-m-d H:i:00', $add15);
+
+        $winner_number = mt_rand(0,32);
+
+        broadcast(new WinnerNumberGenerated($winner_number));
+
+        Promo::where('time', $now)->update([
+            "result" => $winner_number
+        ]);
+
+        $new_promo = Promo::firstOrCreate([
+            "group" => "Hourly",
+            "time" => $time
+        ]);
+
+        broadcast(new PromoHourlyAdded($new_promo));
     }
 }

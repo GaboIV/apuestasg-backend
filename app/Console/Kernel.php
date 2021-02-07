@@ -32,6 +32,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('sync:careers')->dailyAt('03:30');
 
         $schedule->command('sync:careers')->dailyAt('12:30');
+
+        $schedule->command('promo:hourly')->everyFifteenMinutes();
     }
 
     /**

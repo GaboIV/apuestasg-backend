@@ -8,20 +8,20 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class RemainingTimeChanged implements ShouldBroadcast
+class PromoHourlyAdded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $time;
+    public $promo;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($time)
+    public function __construct($promo)
     {
-        $this->time = $time;
+        $this->promo = $promo;
     }
 
     /**
@@ -31,7 +31,6 @@ class RemainingTimeChanged implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        \Log::debug($this->time);
         return new Channel('promo-hourly');
     }
 }

@@ -50,19 +50,24 @@ Route::group(['prefix' => 'public'], function () {
     Route::group(['prefix' => 'careers'], function () {
         Route::get('/{id}', 'General\GeneralController@getCareers');
     });
+
+    // Promociones
+    Route::group(['prefix' => 'promos'], function () {
+        Route::get('next', 'Api\PromoController@getNextPromo');
+    });
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
 	// Cerrar sesión
     Route::get('auth/logout', 'Auth\LoginController@logout');
-    
+
     // Rutas de Administrador
     Route::group(['prefix' => 'admin'], function () {
         // Chagelog
         Route::resource('changelogs', 'Admin\ChangelogController')->except([
             'create', 'edit'
         ]);
-        
+
         // Ligas
         Route::patch('leagues/{id}/attach', 'Admin\LeagueController@attachNameUk');
         Route::patch('leagues/{id}/dettach', 'Admin\LeagueController@dettachNameUk');
@@ -72,7 +77,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::resource('leagues', 'Api\LeagueController')->except([
             'create', 'edit'
         ]);
-        Route::get('updates', 'Admin\AdminController@loadUpdatesLeagues');	
+        Route::get('updates', 'Admin\AdminController@loadUpdatesLeagues');
 
         // Partidos
         Route::put('games/updateOutstanding/{id}', 'Api\GameController@updateOutstanding');
@@ -135,7 +140,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::resource('haras', 'Admin\Horses\HarasController')->except([
                 'create', 'edit'
             ]);
-            
+
             Route::resource('jockeys', 'Admin\Horses\JockeyController')->except([
                 'create', 'edit'
             ]);
@@ -159,7 +164,7 @@ Route::group(['middleware' => 'auth:api'], function () {
                 'create', 'edit'
             ]);
         });
-    });	
+    });
 
 	// Jugadores
 	Route::group(['prefix' => 'player'], function () {
