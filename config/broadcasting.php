@@ -36,12 +36,12 @@ return [
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'encrypted' => true,
-                'host' => 'websockets.apuestasg.win',
-                'port' => 443,
-                'scheme' => 'https',
-                'useTLS' => true,
+                'cluster'   =>  env('PUSHER_APP_CLUSTER',   'mt1'),
+                'encrypted' =>  env('PUSHER_APP_ENCRYPTED', false),
+                'useTLS'    =>  env('PUSHER_APP_ENCRYPTED', false),
+                'scheme'    =>  env('PUSHER_APP_SCHEME',    'http'),
+                'host'      =>  env('WEBSOCKETS_URL',       '127.0.0.1'),
+                'port'      =>  env('WEBSOCKETS_PORT',      '6001'),
             ],
         ],
 
