@@ -13,8 +13,10 @@ use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
 
-class SessionController extends ApiController {
-    public function loadSelections() {
+class SessionController extends ApiController 
+{
+    public function loadSelections() 
+    {
         $user = Auth::user();
         $player = $user->player;
         $selecciones = [];
@@ -72,8 +74,10 @@ class SessionController extends ApiController {
 
                     $decim_tot = $decim_tot * $selections[$i]->value;
 
+                    $selecciones[$i]['id'] = $selections[$i]->id;  
+                    $selecciones[$i]['game_id'] = $selections[$i]->sample;  
+                    $selecciones[$i]['select'] = $selections[$i]->type; 
                     $selecciones[$i]['value'] = $selections[$i]->value; 
-                    $selecciones[$i]['id'] = $selections[$i]->id;   
                     $selecciones[$i]['equipo'] = $selection_name;
                 } 
                 $i++;  
@@ -88,7 +92,8 @@ class SessionController extends ApiController {
         ], 200);
     }
 
-    public function select(Request $request) {
+    public function select(Request $request)
+    {
         $user = Auth::user();
         $player = $user->player;
         $data = $request->all();
@@ -98,8 +103,6 @@ class SessionController extends ApiController {
         $mstatus = '';
         $selecciones = [];
         $tipo = '';
-
-        broadcast(new UserSessionChanged(" ha iniciado sesión", 'success'));
         
         $exists = Selection::whereSelectId($data['bet_id'])
         ->where('type', $data['item_id'])
@@ -201,8 +204,10 @@ class SessionController extends ApiController {
                         $selection_name = $sel->game->teams[$selected_item['caption'] - 1]->name;
                     }
 
+                    $selecciones[$i]['id'] = $selections[$i]->id;  
+                    $selecciones[$i]['game_id'] = $selections[$i]->sample;  
+                    $selecciones[$i]['select'] = $selections[$i]->type; 
                     $selecciones[$i]['value'] = $selections[$i]->value; 
-                    $selecciones[$i]['id'] = $selections[$i]->id;   
                     $selecciones[$i]['equipo'] = $selection_name;
 
                     $i++;
