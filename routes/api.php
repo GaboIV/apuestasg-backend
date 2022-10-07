@@ -125,6 +125,12 @@ Route::group(['middleware' => 'auth:api'], function () {
             'create', 'edit'
         ]);
 
+        // Depósitos
+        Route::group(['prefix' => 'payments'], function () {
+            Route::get('', 'Admin\PaymentController@index');
+            Route::patch('{paymentId}/change-status', 'Admin\PaymentController@changeStatus');
+        });
+
         // Caballos
         Route::group(['prefix' => 'horses'], function () {
             Route::patch('horses/jacket_url/{id}', 'Admin\Horses\HorseController@changeJacketUrl');

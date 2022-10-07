@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Pay extends Model {
+class Payment extends Model {
 
-    protected $with = ["bank", "account"];
+    // protected $with = ["bank", "account"];
 
     protected $fillable = [
         'code',
